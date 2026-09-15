@@ -206,19 +206,39 @@ def load_actions() -> list[dict]:
     return rows
 
 
-def sample_actions(groups: int, items: list[dict], space: str = "") -> list[dict]:
+def sample_actions(groups: int, items: list[dict], space: str = "", rotate: int = 0) -> list[dict]:
     """按配额给槽位配动作：四轮放宽（机位+景别 → 仅景别 → 仅机位 → 任取），被禁用（❌）的跳过。
-    space（逗号分隔的本空间可用环境物，如 `墙面,玻璃门,路缘,长椅`）非空时，
-    需要空间里不存在的道具的动作（如「台阶」）自动排到队尾 —— 避免机位配额达标却拍不出来的动作。"""
+
+    - space 命中 prompts/06-space-profiles.md 的画像时：① 按「可用环境物」过滤需要不存在道具的动作；
+      ② 按画像「避开」词过滤空间不符的动作（如室内空间避开「沿街 / 路口 / 车流 / 台阶」）——这是
+      动作库片段里含街景词、却没有机器可读空间标签的补偿手段（2026-09-17 实测踩到：室内抽出「背向
+      走远·沿街向前走」）。
+    - rotate：把候选池循环位移 N 位，用于让不同行抽出**不同**的九组（否则同一 space 各行结果完全一致）。
+    """
+    props, prof = resolve_space(space)
+    avoid = [x for x in prof.get("avoid", []) if x]
+
     def env_fit(a) -> bool:
         need = a.get("env_need") or ""
-        if not (space and need):
+        if not (props and need):
             return True
-        have = [s.strip() for s in re.split(r"[,，/、]", space) if s.strip()]
-        return any(n in s or s in n for n in [need] for s in have)
+        return any(need in p or p in need for p in props)
+
+    avoid_fams = [x for x in prof.get("avoid_fams", []) if x]
+
+    def is_excluded(a) -> bool:
+        if avoid_fams and a["no"][:1] in avoid_fams:
+            return True
+        return bool(avoid) and any(x in (a["fragment"] + a["contact"] + a["name"]) for x in avoid)
 
     pool = [a for a in items if "❌" not in a["risk"]]
-    pool.sort(key=lambda a: 0 if env_fit(a) else 1)          # 空间可用的优先，不淘汰（保配额）
+    good = [a for a in pool if not is_excluded(a)]
+    rest = [a for a in pool if is_excluded(a)]
+    good.sort(key=lambda a: 0 if env_fit(a) else 1)          # 空间可用的优先
+    if rotate and good:                                       # 只在「空间适配」段内位移，避免把不符动作转上来
+        k = rotate % len(good)
+        good = good[k:] + good[:k]
+    pool = good + rest                                        # 不符项排到最后：配额无解时仍可兜底，不会抽不满
     used, out = set(), []
     for i, (cam, shot, gaze) in enumerate(QUOTA[groups], 1):
         def cam_ok(a):
@@ -400,7 +420,7 @@ def load_space_profiles() -> dict:
         m = re.match(r"^##\s+(.+?)\s*$", line)
         if m:
             cur = m.group(1).strip()
-            profs[cur] = {"props": [], "weights": {}, "avoid": []}
+            profs[cur] = {"props": [], "weights": {}, "avoid": [], "avoid_fams": []}
             continue
         if cur is None or not line.strip().startswith("-"):
             continue
@@ -412,6 +432,8 @@ def load_space_profiles() -> dict:
                 fm = re.match(r"([WSCTHPGMDEX])[=:×*]?(\d+)?$", tok.strip())
                 if fm:
                     profs[cur]["weights"][fm.group(1)] = int(fm.group(2) or 2)
+        elif "避开族" in key:
+            profs[cur]["avoid_fams"] = [s.strip().upper() for s in re.split(r"[,，/、\s]", val) if s.strip()]
         elif "避开" in key or "禁用" in key:
             profs[cur]["avoid"] = [s.strip() for s in re.split(r"[,，/、]", val) if s.strip()]
     return profs
@@ -639,7 +661,8 @@ def main() -> int:
                "banned": kb_banned(), "refs": kb_channel_examples(2)},
         "facts": {"aspect": "3:4", "size_1k": "864x1152", "model": "gpt-image-2-vip", "need_serial": True},
     }
-    pkg["actions"] = sample_actions(a.groups, load_actions(), a.space)
+    # 按行号自动位移候选池 → 不同行抽出不同九组（同一 space 也能有变化）
+    pkg["actions"] = sample_actions(a.groups, load_actions(), a.space, rotate=(a.row or 0) * 11)
     pkg["quota_violations"] = check_quota(pkg["actions"], a.groups)
     pkg["groups_skeleton"] = render_group_lines(pkg["actions"])
     if pkg["quota_violations"]:
