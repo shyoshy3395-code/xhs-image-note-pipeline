@@ -318,10 +318,10 @@
 
 ```bash
 PY=~/.hermes/hermes-agent/venv/bin/python3
-S=~/.hermes/profiles/aim-editor/skills/productivity/ricovea-prompt-templates/scripts/check_action_distribution.py
+S=~/.hermes/profiles/aim-editor/skills/productivity/brand-prompt-templates/scripts/check_action_distribution.py
 
 # ① 自检本文档里的所有范例（默认 --all）
-$PY $S ~/.hermes/profiles/aim-editor/skills/productivity/ricovea-prompt-templates/references/10-action-library.md
+$PY $S ~/.hermes/profiles/aim-editor/skills/productivity/brand-prompt-templates/references/10-action-library.md
 
 # ② 自检某行的运行器（直接从 GROUPS 里抽，不用手抄）
 $PY $S ~/Desktop/Hermes/图片笔记0914_工作文件/行4_runner.py --groups 9
