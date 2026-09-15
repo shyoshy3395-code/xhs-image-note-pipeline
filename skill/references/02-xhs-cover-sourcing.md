@@ -79,6 +79,31 @@ for i, url in enumerate(urls):
 > 候选池不够时，可直接从 search 的 JSON 里派生更多 `/explore/` URL（同一 token 原样搬运），
 > 不必反复重搜——搜索接口本身也有节流。
 
+### ★★ 会话级节流的第二把钥匙：`--site-session ephemeral`（2026-09-17 实测 · 必读）
+
+第一把钥匙（条间 12s + 重试退避）只对**轻度**节流有效。累计下到 **50+ 条**后会撞上**靶向封锁**：
+
+| 现象 | 判读 |
+|---|---|
+| `note` / `download` 全部 `Navigation rejected.` | 笔记详情这一路被限 |
+| `whoami` / `feed` / `search` **照常可用**（`logged_in: true`） | **登录态没死**，不是掉登录 |
+| 换重搜的新 token 仍被拒 | 与 token 时效无关 |
+| 退避 45s × 4 次仍全拒 | 裸等待无效 |
+| **加 `--site-session ephemeral` → 秒过** | ✅ **唯一有效解** |
+
+```bash
+# 靶向封锁下的正确姿势（开一个全新站点会话）
+opencli xiaohongshu download "<explore URL>" --output <dir> --site-session ephemeral -f table
+opencli xiaohongshu note     "<explore URL>" -f json --site-session ephemeral
+```
+
+**三步判据（别一上来就长等待）**：
+1. 跑 `whoami` —— 若它也失败 → 登录态问题，让用户在 Chrome 里重新登录；
+2. 若 `whoami` / `search` 正常、只有 `note` / `download` 被拒 → **靶向封锁，直接加 `--site-session ephemeral`**；
+3. `--window foreground` 也能过，但会抢焦点 → 批处理里优先用 `ephemeral`。
+
+> 实测代价：不知道这一招时，8 次三连败 + 多轮排查浪费约 40 分钟；知道后同一条笔记秒过。
+
 ### URL 形态与 token（两个实测坑）
 
 - `search` 给的是 `https://www.xiaohongshu.com/search_result/<note-id>?xsec_token=<T>&xsec_source=`
@@ -245,3 +270,7 @@ for row in ws.iter_rows(min_row=1, max_row=6, max_col=34):
   接触表 + 单次 vision 评审法（但入选图必须看原图）· **三个「锚点全对图却看不见」的坑**
   （customHeight 骗行高 → 15×20px / 图片尺寸按旧行高算 / 无 wrapText 长文本被截断）与像素验收闸门 ·
   §六 DISPIMG→media 映射与**逐行锚点齐备闸门**（空行不可出图）
+- v3 2026-09-17 补两处实测：**① 会话级节流的第二把钥匙 `--site-session ephemeral`**（累计 50+ 条后
+  `note`/`download` 靶向封锁、`whoami`/`search` 仍正常 → 换临时站点会话即秒过，含三步判据）；
+  **② 坑④「图看得见但文件打不开」**（openpyxl 新建空白簿无 `xmlns:r` → `<drawing r:id>` 成未绑定前缀
+  → 整包不可读），验收闸门因此新增「用 openpyxl 重新 load 一遍」这一步

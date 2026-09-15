@@ -1,6 +1,6 @@
 ---
 name: xhs-image-note-pipeline
-description: 小红书图片笔记流水线 —— 从真实爆款封面反推环境提示词，生成首图与 9 组动作变体，回填 Excel 模板并产出标题/正文/话题。提示词全部外置在 prompts/ 可编辑，运行时读取自带知识库与动作提示词库。
+description: 小红书图片笔记流水线 —— 从真实爆款封面反推环境提示词，生成首图与 9 组动作变体，回填 Excel 模板并产出标题/正文/话题。提示词全部外置在 prompts/ 可编辑，运行时读取自带知识库与【动作提示词库】。
 license: MIT
 ---
 
@@ -13,7 +13,7 @@ license: MIT
 
 1. **阶段 0**：读 `prompts/01-cover-filter.md` + `references/02-xhs-cover-sourcing.md`，抓封面并按标准筛选 → 3:4 内嵌到参考图列
 2. **阶段 1**：看封面图，按 `prompts/02-reverse-reasoning.md` 写**只含环境与拍摄**的英文提示词 → 反推列
-3. **阶段 2**：`python3 skill/scripts/pipeline_loader.py …` 装配提示词包（自动从动作库抽条 + 配额自查）→ `python3 skill/scripts/run_image_note.py …` 出首图与各组
+3. **阶段 2**：`python3 skill/scripts/pipeline_loader.py …` 装配提示词包（自动从【动作提示词库】抽条 + 配额自查）→ `python3 skill/scripts/run_image_note.py …` 出首图与各组
 4. **阶段 3**：读 `prompts/05-copywriting.md` + `knowledge_base/` 写标题/正文/话题 → 内嵌回 xlsx → 过交付闸门
 
 ## 关键纪律

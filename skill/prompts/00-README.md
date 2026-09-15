@@ -5,7 +5,7 @@
 
 ## 改法（唯一正确路径）
 
-1. 只改 **default 源库**：`./prompts/`
+1. 只改 **default 源库**：`~/.hermes/skills/productivity/./prompts/`
 2. 跑 `bash ~/.hermes/sync_skills.sh` → 推到 5 个角色（角色副本是只读的，直接改留不住）
 3. 验证：`python3 scripts/pipeline_loader.py --check`
 

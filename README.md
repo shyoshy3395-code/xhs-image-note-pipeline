@@ -3,7 +3,7 @@
 把一张「真实爆款封面」的**空间与光影**复刻成 9 张成图，并自动回填进 Excel 模板 —— 供 AI Agent（Hermes Agent）驱动，也可脱离 Agent 当纯脚本用。
 
 > 核心思路：**封面只借空间，人物与服装靠自己的参考图锁死。**
-> `参考封面 → 反推环境提示词 → 首图 → 动作库抽条生成 9 组 → 内嵌回 Excel → 出文案`
+> `参考封面 → 反推环境提示词 → 首图 → 【动作提示词库】抽条生成 9 组 → 内嵌回 Excel → 出文案`
 
 ## 它能做什么
 
@@ -21,7 +21,7 @@ git clone <this-repo> && cd xhs-image-note-pipeline
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 1) 体检：提示词 / 知识库 / 动作库是否齐
+# 1) 体检：提示词 / 知识库 / 【动作提示词库】是否齐
 python3 skill/scripts/pipeline_loader.py --check
 
 # 2) 装配一行的提示词包（会打印配额自查结果）
@@ -54,7 +54,7 @@ skill/
 │   ├── 04-nine-groups.md    9 组输出格式 + 配额矩阵
 │   └── 05-copywriting.md    文案规格 + 知识库取料顺序
 ├── scripts/
-│   ├── pipeline_loader.py   🧩 装配器：提示词 + 知识库 + 动作库 → 提示词包（内置配额闸门/空间适配）
+│   ├── pipeline_loader.py   🧩 装配器：提示词 + 知识库 + 【动作提示词库】 → 提示词包（内置配额闸门/空间适配）
 │   └── run_image_note.py    🚀 运行器：串行 / 可续跑 / 重试；**脚本内零提示词正文**
 └── references/
     ├── 01-reverse-prompt-spec.md   反推规格

@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 """图片笔记流水线 · 素材装配器（pipeline_loader）
 
+作用：把「可编辑提示词 + {{品牌}} 知识库 + AI 动作提示词库」装配成一个「本行提示词包」。
       —— 提示词从 prompts/*.md 实时读取（改完立即生效，不缓存、不内联、不改代码）
       —— 素材从 knowledge_base 实时读取（外部定位/卖点/禁用词/渠道语气/参照成品）
-      —— 动作从 references/03-action-library.md 实时抽条（按配额，带编号）
+      —— 动作从 references/10-action-library.md 实时抽条（按配额，带编号）
 
 用法：
-  python3 pipeline_loader.py --check                     # 体检：提示词文件/知识库/动作库是否可读
-  python3 pipeline_loader.py --list-families             # 看动作库各族条目数
+  python3 pipeline_loader.py --check                     # 体检：提示词文件/知识库/【动作提示词库】是否可读
+  python3 pipeline_loader.py --list-families             # 看【动作提示词库】各族条目数
   python3 pipeline_loader.py --row 2 --item 暮海蓝牛仔裤 --groups 9 \
           --out /tmp/pkg_row2.json --emit-groups /tmp/groups_row2.md
   python3 pipeline_loader.py --render-locks --out /tmp/locks.txt
@@ -24,8 +25,24 @@ import sys
 HOME = os.path.expanduser("~")
 SKILL = os.environ.get("NOTE_PIPELINE_DIR", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PROMPTS = os.path.join(SKILL, "prompts")
-ACTION_LIB = os.path.join(SKILL, "references/03-action-library.md")
-KB = os.environ.get("NOTE_KB_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "knowledge_base"))
+# 动作提示词库：兼容多种命名（本库 references/10-action-library.md；对外版 references/03-action-library.md）
+ACTION_LIB_CANDIDATES = ("references/10-action-library.md", "references/03-action-library.md",
+                         "references/action-library.md", "action-library.md")
+KB = os.environ.get("NOTE_KB_DIR", os.path.join(SKILL, "..", "knowledge_base"))
+
+
+def action_lib_path() -> str:
+    """定位【动作提示词库】。可用 NOTE_ACTION_LIB 环境变量指定；否则按候选名依次找。"""
+    env = os.environ.get("NOTE_ACTION_LIB")
+    if env and os.path.exists(env):
+        return env
+    for c in ACTION_LIB_CANDIDATES:
+        p = os.path.join(SKILL, c)
+        if os.path.exists(p):
+            return p
+    raise FileNotFoundError(
+        "找不到【动作提示词库】。候选：" + "、".join(ACTION_LIB_CANDIDATES)
+        + f"（根目录 {SKILL}）；可用 NOTE_ACTION_LIB=/abs/path 指定")
 
 # 配额（9 组 / 8 组）——「机位, 景别, 视线」三元组，按此顺序占满槽位
 # 注意：机位只认 正面/3-4侧/全侧/背面 四大类；「局部特写」是【景别】不是机位。
@@ -142,24 +159,49 @@ def kb_channel_examples(n: int = 3) -> list[dict]:
 
 # ── 3. 动作提示词库 ────────────────────────────────────────────
 def load_actions() -> list[dict]:
-    """解析 10-action-library.md 的条目表 → 结构化动作条目（含 env_need：该动作需要的环境物）。"""
-    if not os.path.exists(ACTION_LIB):
-        raise FileNotFoundError(f"动作库缺失：{ACTION_LIB}")
-    rows = []
-    fam = ""
-    for line in read(ACTION_LIB).splitlines():
+    """解析【动作提示词库】的条目表 → 结构化动作条目（含 env_need：该动作需要的环境物）。
+
+    2026-09-17 修两处（都是「表结构一变就静默出错」）：
+      ① 原来按**固定列序**取值（ID+7 格）→ 表里插入「归入族」列后 `risk` 取到了族名、
+         禁用项过滤失效。改为**按表头文字定位列**。
+      ② 来源表（每行也以 `| X09 |` 开头）被当成动作条目 → 条数虚高（18 算成 28）。
+         改为：**只解析表头同时含「动作名」与「提示词片段」的表**。
+    """
+    lib = action_lib_path()          # ← 调用【动作提示词库】的唯一入口（NOTE_ACTION_LIB 可覆盖）
+    if not os.path.exists(lib):
+        raise FileNotFoundError(f"【动作提示词库】缺失：{lib}")
+    rows, fam, cols = [], "", None
+    for line in read(lib).splitlines():
         hm = re.match(r"^###\s+([WSCTHPGMDEX])\s+·\s+(.+)", line)
         if hm:
-            fam = f"{hm.group(1)} · {hm.group(2).strip()}"
+            fam, cols = f"{hm.group(1)} · {hm.group(2).strip()}", None
             continue
-        m = re.match(r"^\|\s*([WSCTHPGMDEX]\d{1,3})\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|", line)
-        if not m:
+        if not line.strip().startswith("|"):
             continue
-        contact = m.group(6).strip()
-        em = re.search(r"环境\(([^)]+)\)", contact)
-        rows.append({"no": m.group(1), "name": m.group(2).strip(), "fragment": m.group(3).strip(),
-                     "camera": m.group(4).strip(), "shot": m.group(5).strip(),
-                     "contact": contact, "risk": m.group(7).strip(), "family": fam,
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if any("编号" in c for c in cells):          # 任意表头行
+            if any("动作名" in c for c in cells) and any("提示词片段" in c for c in cells):
+                cols = list(cells)                   # 条目表 → 记下列名顺序
+            else:
+                cols = None                          # 来源表等非条目表 → 关闭解析（防误吞）
+            continue
+        if cols is None or not cells or not re.match(r"^[WSCTHPGMDEX]\d{1,3}$", cells[0]):
+            continue                                 # 非条目表 / 分隔行 → 跳过
+
+        def g(key: str) -> str:
+            for i, name in enumerate(cols):
+                if key in name and i < len(cells):
+                    return cells[i]
+            return ""
+
+        contact = g("接触")
+        # env_need：空间适配用。必须同时认出「环境(台阶)」（半角）与「环境接触（坐椅）」（全角+带"接触"）
+        # —— 2026-09-17 修：原正则只匹配 `环境\(`，X 族条目一律写成「环境接触（…）」→ 永远解析不到，
+        #    `--space` 空间过滤对 X 族静默失效。
+        em = re.search(r"环境(?:接触)?[（(]([^）)+]+)[）)]", contact)
+        rows.append({"no": cells[0], "name": g("动作名"), "fragment": g("提示词片段"),
+                     "camera": g("建议机位"), "shot": g("建议景别"), "contact": contact,
+                     "risk": g("风险"), "family": fam,
                      "env_need": em.group(1).strip() if em else ""})
     return rows
 
@@ -290,6 +332,97 @@ def cmd_check() -> int:
     return 0 if (ok and acts) else 1
 
 
+def cmd_lib() -> int:
+    """列出【动作提示词库】全貌：族 / 条目数 / 可配组数（技能调用动作库的第一入口）。"""
+    acts = load_actions()
+    print(f"【动作提示词库】{action_lib_path()}")
+    print(f"共 {len(acts)} 条 · {len({a['family'] for a in acts})} 族\n")
+    fams = {}
+    for a in acts:
+        fams.setdefault(a["family"], []).append(a)
+    for f, items in fams.items():
+        cams = {}
+        shots = {}
+        for a in items:
+            cams[a["camera"]] = cams.get(a["camera"], 0) + 1
+            shots[a["shot"]] = shots.get(a["shot"], 0) + 1
+        print(f"  {f}")
+        print(f"     条目 {len(items)} · 机位 {dict(cams)}")
+        print(f"     景别 {dict(shots)}")
+    print("\n用法：--find 关键词 / --family D / --sample 9 --space 墙面,玻璃门 / --append '编号|动作名|片段|机位|景别|接触|风险' --family D")
+    return 0
+
+
+def cmd_find(kw: str) -> int:
+    """在动作库中检索（编号 / 动作名 / 提示词片段）。"""
+    hits = [a for a in load_actions()
+            if kw.lower() in (a["no"] + a["name"] + a["fragment"] + a["contact"] + a["family"]).lower()]
+    print(f"检索「{kw}」→ {len(hits)} 条")
+    for a in hits:
+        print(f"  {a['no']:>4} {a['name']} ｜{a['camera']}｜{a['shot']}｜{a['contact']}｜{a['risk']}")
+        print(f"       {a['fragment']}")
+    return 0 if hits else 1
+
+
+def cmd_family(letter: str) -> int:
+    """列出某族全部条目（如 D / S / H / X）。"""
+    letter = letter.strip().upper()
+    items = [a for a in load_actions() if a["no"].startswith(letter)]
+    if not items:
+        print(f"没有 {letter} 族条目"); return 1
+    print(f"{items[0]['family']} — {len(items)} 条")
+    for a in items:
+        print(f"| {a['no']} | {a['name']} | {a['fragment']} | {a['camera']} | {a['shot']} | {a['contact']} | {a['risk']} |")
+    return 0
+
+
+def cmd_sample(n: int, space: str, groups: int = 9) -> int:
+    """只抽条（不出图）：按配额从动作库抽 n 条并输出骨架，供人工替换/校对。"""
+    acts = sample_actions(groups, load_actions(), space)
+    acts = acts[:n]
+    bad = check_quota(acts, groups) if n == groups else []
+    print(render_group_lines(acts))
+    print(f"\n（抽条 {len(acts)} 条｜空间适配 --space={space or '未指定'}｜"
+          f"配额{'✅ 通过' if not bad else '⚠️ ' + '；'.join(bad)}）")
+    return 0
+
+
+def cmd_append(family: str, spec: str) -> int:
+    """把实测新动作**写回动作库**（库是活的）：--family D --append 'D09|动作名|提示词片段|机位|景别|接触|风险'。"""
+    fam = family.strip().upper()
+    parts = [p.strip() for p in spec.strip().strip("|").split("|")]
+    if len(parts) < 5:
+        print("格式：'编号|动作名|提示词片段|机位|景别|接触|风险'（至少 5 段）"); return 2
+    parts += [""] * (7 - len(parts))
+    no = parts[0]
+    if not re.match(rf"^{fam}\d{{1,3}}$", no):
+        print(f"编号 {no} 与族 {fam} 不匹配（应形如 {fam}09）"); return 2
+    lib = action_lib_path()
+    lines = read(lib).splitlines()
+    if any(l.strip().startswith(f"| {no} ") for l in lines):
+        print(f"{no} 已存在，未写入（要改就直接改库文件）"); return 1
+    # 定位该族的条目表，插到最后一行之后
+    head = next((i for i, l in enumerate(lines) if re.match(rf"^###\s+{fam}\s+·", l)), None)
+    if head is None:
+        print(f"库里没有 {fam} 族"); return 1
+    last = None
+    for i in range(head + 1, len(lines)):
+        if lines[i].startswith("### ") or (lines[i].startswith("## ") and i > head + 1):
+            break
+        if re.match(rf"^\|\s*{fam}\d{{1,3}}\s*\|", lines[i]):
+            last = i
+    if last is None:
+        print(f"{fam} 族下没找到条目表"); return 1
+    lines.insert(last + 1, "| " + " | ".join(parts) + " |")
+    # 族标题里的（N）计数要 +1（注意：计数可能在行中间，后面还跟着说明文字）
+    m = re.match(rf"^(###\s+{fam}\s+·\s+[^（]*)（(\d+)）(.*)$", lines[head])
+    if m:
+        lines[head] = f"{m.group(1)}（{int(m.group(2)) + 1}）{m.group(3)}"
+    open(lib, "w", encoding="utf-8").write("\n".join(lines) + "\n")
+    print(f"✅ 已写入 {action_lib_path()} → {no}（族内计数已 +1；记得跑 sync/push）")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="图片笔记流水线素材装配器")
     ap.add_argument("--check", action="store_true")
@@ -303,14 +436,37 @@ def main() -> int:
     ap.add_argument("--out", help="输出提示词包 JSON")
     ap.add_argument("--emit-groups", help="输出九组骨架 MD（可读可改）")
     ap.add_argument("--render-locks", action="store_true")
+    # ── 【动作提示词库】独立调用入口（本项目的一等公民能力）──
+    ap.add_argument("--lib", action="store_true", help="列出动作库全貌（族/条目数/机位景别分布）")
+    ap.add_argument("--find", default="", help="在动作库检索条目（编号/动作名/提示词片段/族）")
+    ap.add_argument("--family", default="", help="列出某族全部条目（如 D / S / H / X）")
+    ap.add_argument("--sample", type=int, default=0, help="只从动作库抽 N 条（配 --space），不出图")
+    ap.add_argument("--append", default="", help="向动作库回写新条目：'编号|动作名|片段|机位|景别|接触|风险'（配 --family）")
     a = ap.parse_args()
 
     if a.check:
         return cmd_check()
     if a.list_families:
-        for k, v in sorted({x["family"] for x in load_actions()}):
-            print(" ", k)
+        # 修 2026-09-17：原来是 `for k, v in sorted({x["family"] ...})` —— 集合元素是字符串，
+        # 二元组解包必然 ValueError（族名超 2 字符）。改为按族计数输出。
+        from collections import Counter
+        counts = Counter(x["family"] for x in load_actions())
+        total = sum(counts.values())
+        for fam, n in sorted(counts.items()):
+            print(f"  {n:>4}  {fam}")
+        print(f"  ──── 共 {len(counts)} 族 / {total} 条")
         return 0
+    # ── 【动作提示词库】独立调用入口 ──
+    if a.lib:
+        return cmd_lib()
+    if a.find:
+        return cmd_find(a.find)
+    if a.family and not a.append:
+        return cmd_family(a.family)
+    if a.sample:
+        return cmd_sample(a.sample, a.space, a.groups)
+    if a.append:
+        return cmd_append(a.family, a.append)
 
     P = prompts_all()
     locks_md = P["03-locks"]
