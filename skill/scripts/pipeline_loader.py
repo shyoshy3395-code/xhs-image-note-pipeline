@@ -387,16 +387,165 @@ def cmd_sample(n: int, space: str, groups: int = 9) -> int:
     return 0
 
 
-def cmd_append(family: str, spec: str) -> int:
-    """把实测新动作**写回动作库**（库是活的）：--family D --append 'D09|动作名|提示词片段|机位|景别|接触|风险'。"""
+# ── 3b. 空间画像 + 值域校验（都从可编辑文件里读，代码不写死规则）────────────────
+SPACE_PROFILE_FILE = os.path.join(PROMPTS, "06-space-profiles.md")
+
+
+def load_space_profiles() -> dict:
+    """解析 prompts/06-space-profiles.md → {空间名: {props, weights, avoid}}。"""
+    if not os.path.exists(SPACE_PROFILE_FILE):
+        return {}
+    profs, cur = {}, None
+    for line in read(SPACE_PROFILE_FILE).splitlines():
+        m = re.match(r"^##\s+(.+?)\s*$", line)
+        if m:
+            cur = m.group(1).strip()
+            profs[cur] = {"props": [], "weights": {}, "avoid": []}
+            continue
+        if cur is None or not line.strip().startswith("-"):
+            continue
+        key, _, val = line.strip().lstrip("-").strip().partition("：")
+        if "环境物" in key or "可用" in key:
+            profs[cur]["props"] = [s.strip() for s in re.split(r"[,，/、]", val) if s.strip()]
+        elif "族" in key:
+            for tok in re.split(r"[,，/、\s]+", val):
+                fm = re.match(r"([WSCTHPGMDEX])[=:×*]?(\d+)?$", tok.strip())
+                if fm:
+                    profs[cur]["weights"][fm.group(1)] = int(fm.group(2) or 2)
+        elif "避开" in key or "禁用" in key:
+            profs[cur]["avoid"] = [s.strip() for s in re.split(r"[,，/、]", val) if s.strip()]
+    return profs
+
+
+def resolve_space(space: str) -> tuple[list[str], dict]:
+    """把 --space 解析成（可用环境物清单, 空间画像）。命中画像就用画像，否则按逗号当环境物清单。"""
+    profs = load_space_profiles()
+    key = next((k for k in profs if space and (space in k or any(s and s in space for s in k.split("/")))), None)
+    if key:
+        return profs[key]["props"], profs[key]
+    return [s.strip() for s in re.split(r"[,，/、]", space) if s.strip()], {}
+
+
+def load_domains() -> dict:
+    """从动作库 §二 六槽位值域表解析合法值域（库本身是唯一事实源，改库即改校验）。
+
+    坑：库里多张表都有「机位 / 景别」行（§二 值域表、§4.1 配额表…）。必须**只在值域章节内解析**，
+    否则配额表的「全身≥4 · 七分≥2」会被当成合法值域 → 合法条目被误拒（2026-09-17 实测踩到）。
+    """
+    dom: dict[str, list[str]] = {}
+    try:
+        text = read(action_lib_path())
+    except FileNotFoundError:
+        return dom
+    in_section = False
+    for line in text.splitlines():
+        if re.match(r"^#{1,3}\s+", line):
+            in_section = bool(re.search(r"值域", line))
+            continue
+        if not in_section or not line.strip().startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 2:
+            continue
+        key = re.sub(r"\*", "", cells[0]).strip()
+        if key not in ("机位", "景别", "视线", "接触关系") or key in dom:
+            continue
+        vals = []
+        cell = re.sub(r"<br\s*/?>.*$", "", cells[1], flags=re.S)   # 丢掉 <br> 之后的变体清单
+        cell = re.sub(r"（[^）]*）|\([^)]*\)", "", cell)            # 丢掉括号说明（里头也有加粗的说明词）
+        vals = [v.strip() for v in re.findall(r"\*\*([^*]+)\*\*", cell)]
+        if not vals:
+            vals = [v.strip() for v in re.split(r"[/|]", cell) if v.strip()]
+        # 过滤：只剔除配额类（带 ≥/≤）与超长说明；**保留含数字的值**（如 3-4侧）
+        clean = [re.sub(r"（.*", "", v).strip() for v in vals if v.strip()]
+        clean = [v for v in clean if v and "≥" not in v and "≤" not in v and len(v) <= 8]
+        if clean:
+            dom[key] = clean
+    return dom
+
+
+def validate_spec(no: str, name: str, frag: str, camera: str, shot: str,
+                  contact: str, risk: str, family: str) -> list[str]:
+    """入库校验：编号/机位/景别/接触/风险值域 + 片段与动作名长度。返回错误列表（空＝通过）。"""
+    errs, dom = [], load_domains()
+    if not re.match(rf"^{family}\d{{1,3}}$", no):
+        errs.append(f"编号 {no} 与族 {family} 不匹配（应形如 {family}07）")
+    cam = re.sub(r"[（(].*", "", camera).strip()      # 变体可能写在半角或全角括号里，两种都要剥
+    if dom.get("机位") and cam not in dom["机位"] and "空镜" not in cam:
+        errs.append(f"机位「{camera}」不在值域 {dom['机位']}（变体请写进括号，如 正面(仰拍)）")
+    if dom.get("景别") and not any(v in shot for v in dom["景别"]):
+        errs.append(f"景别「{shot}」不在值域 {dom['景别']}")
+    if dom.get("接触关系") and contact and not any(v.replace("接触", "") in contact for v in dom["接触关系"]):
+        errs.append(f"接触「{contact}」不在值域 {dom['接触关系']}（环境/道具类请写成 环境(台阶)）")
+    if not re.match(r"^[✅⚠️❌]", risk):
+        errs.append(f"风险「{risk}」须以 ✅ / ⚠️ / ❌ 开头（可跟说明）")
+    n = len(re.sub(r"\s", "", frag))
+    if not 8 <= n <= 140:
+        errs.append(f"提示词片段 {n} 字，须在 8–140 字之间（太短没信息、太长会稀释锁块）")
+    if not 2 <= len(name) <= 14:
+        errs.append(f"动作名 {len(name)} 字，须在 2–14 字之间")
+    return errs
+
+
+def rank_by_space(space: str, top: int = 20) -> tuple[list[tuple], list[str], dict]:
+    """按空间批量推荐：可用环境物过滤 + 族权重排序 + 风险加权。返回 (排序结果, 环境物, 画像)。"""
+    props, prof = resolve_space(space)
+    weights, avoid = prof.get("weights", {}), prof.get("avoid", [])
+    rows = []
+    for a in load_actions():
+        if "❌" in a["risk"]:
+            continue
+        need = a.get("env_need") or ""
+        if need and props and not any(need in p or p in need for p in props):
+            continue                                    # 需要空间里没有的物件 → 不推荐
+        if avoid and any(x and x in (a["fragment"] + a["contact"]) for x in avoid):
+            continue
+        w = int(weights.get(a["no"][0], 1))
+        score = 2 * w + (1 if a["risk"].startswith("✅") else 0) - (2 if "⚠️⚠️" in a["risk"] else 0)
+        rows.append((score, w, a))
+    rows.sort(key=lambda t: (-t[0], t[2]["no"]))
+    return rows[:top], props, prof
+
+
+def cmd_space(space: str, top: int, groups: int, emit: str = "") -> int:
+    """按空间批量推荐动作（--space 咖啡馆 --top 20）。"""
+    rows, props, prof = rank_by_space(space, top)
+    tag = "空间画像命中" if prof else "按环境物清单（无画像）"
+    print(f"空间「{space}」 → {tag}｜可用环境物：{'、'.join(props) or '未指定'}")
+    if prof:
+        print(f"族权重：{prof.get('weights')}｜避开：{prof.get('avoid') or '—'}")
+    print(f"\n推荐 {len(rows)} 条：\n")
+    print("| 序 | 编号 | 动作名 | 机位 | 景别 | 接触 | 风险 |")
+    print("|---|---|---|---|---|---|---|")
+    for i, (score, w, a) in enumerate(rows, 1):
+        print(f"| {i} | {a['no']} | {a['name']} | {a['camera']} | {a['shot']} | {a['contact']} | {a['risk']} |")
+    if emit:
+        with open(emit, "w", encoding="utf-8") as fh:
+            fh.write(f"# 空间「{space}」动作推荐 top{top}（{tag}）\n\n")
+            fh.write("| 序 | 编号 | 动作名 | 提示词片段 | 机位 | 景别 | 接触 | 风险 |\n|---|---|---|---|---|---|---|---|\n")
+            for i, (score, w, a) in enumerate(rows, 1):
+                fh.write(f"| {i} | {a['no']} | {a['name']} | {a['fragment']} | {a['camera']} | {a['shot']} | {a['contact']} | {a['risk']} |\n")
+        print(f"\n  ✓ 已导出 → {emit}")
+    return 0 if rows else 1
+
+
+def cmd_append(family: str, spec: str, force: bool = False) -> int:
+    """把实测新动作**写回动作库**（库是活的）；入库前过「值域 / 长度」校验，防脏数据。"""
     fam = family.strip().upper()
     parts = [p.strip() for p in spec.strip().strip("|").split("|")]
     if len(parts) < 5:
         print("格式：'编号|动作名|提示词片段|机位|景别|接触|风险'（至少 5 段）"); return 2
     parts += [""] * (7 - len(parts))
-    no = parts[0]
-    if not re.match(rf"^{fam}\d{{1,3}}$", no):
-        print(f"编号 {no} 与族 {fam} 不匹配（应形如 {fam}09）"); return 2
+    no, name, frag, camera, shot, contact, risk = parts[:7]
+    errs = validate_spec(no, name, frag, camera, shot, contact, risk, fam)
+    if errs:
+        print("⛔ 入库校验未通过（未写入）：")
+        for e in errs:
+            print("   ✗", e)
+        if not force:
+            print("\n改好再提交；确要强行写入可加 --force（不建议——脏数据会污染闸门与动作分布统计）")
+            return 2
+        print("\n⚠️ --force：忽略以上问题继续写入")
     lib = action_lib_path()
     lines = read(lib).splitlines()
     if any(l.strip().startswith(f"| {no} ") for l in lines):
@@ -442,6 +591,9 @@ def main() -> int:
     ap.add_argument("--family", default="", help="列出某族全部条目（如 D / S / H / X）")
     ap.add_argument("--sample", type=int, default=0, help="只从动作库抽 N 条（配 --space），不出图")
     ap.add_argument("--append", default="", help="向动作库回写新条目：'编号|动作名|片段|机位|景别|接触|风险'（配 --family）")
+    ap.add_argument("--top", type=int, default=0, help="按空间批量推荐 N 条（配 --space，如 --space 咖啡馆 --top 20）")
+    ap.add_argument("--emit-space", default="", help="把空间推荐结果导出为 MD")
+    ap.add_argument("--force", action="store_true", help="--append 时跳过入库校验（不建议）")
     a = ap.parse_args()
 
     if a.check:
@@ -465,8 +617,10 @@ def main() -> int:
         return cmd_family(a.family)
     if a.sample:
         return cmd_sample(a.sample, a.space, a.groups)
+    if a.top:
+        return cmd_space(a.space, a.top, a.groups, a.emit_space)
     if a.append:
-        return cmd_append(a.family, a.append)
+        return cmd_append(a.family, a.append, a.force)
 
     P = prompts_all()
     locks_md = P["03-locks"]

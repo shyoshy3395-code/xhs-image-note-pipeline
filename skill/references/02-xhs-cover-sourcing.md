@@ -104,6 +104,27 @@ opencli xiaohongshu note     "<explore URL>" -f json --site-session ephemeral
 
 > 实测代价：不知道这一招时，8 次三连败 + 多轮排查浪费约 40 分钟；知道后同一条笔记秒过。
 
+
+**opencli 不接受短链**：`note` / `download` 都会报 `ARGUMENT: now requires a full signed URL`
+（帮助文本写着支持 xhslink，实测被校验拦下）。正确通路：
+
+```bash
+# ① 解短链 —— ⚠️ xhslink.cn 是境内域名，**必须去掉代理**（带代理 curl 返回 code 000）
+env -u https_proxy -u http_proxy -u all_proxy \
+  curl -sL -A "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 …) Safari/604.1" \
+  -o /tmp/xhs_link.html -w '%{url_effective}\n' "https://xhslink.cn/o/XXXX"
+# → 有效 URL 形如
+#   https://www.xiaohongshu.com/discovery/item/<note-id>?…&xsec_token=<TOKEN>&…
+# ② 从有效 URL 里取 note-id 与 xsec_token，改写成 explore 形态再下载（媒体侧同样去代理）
+opencli xiaohongshu download "https://www.xiaohongshu.com/explore/<note-id>?xsec_token=<TOKEN>" \
+  --output <dir> -f table --site-session ephemeral
+```
+
+要点：**token 从跳转 URL 原样搬运**（勿补 `=`）；短链解出来的 URL 里带 `type=normal`
+（图文）或视频标记，可据此预判是不是图文笔记。
+⚠️ 分享链接来的笔记**不在搜索结果里**，所以它没经过封面边界的批量筛选 —— 落库前要单独跑一次
+「封面合规自检」（文字/水印/镜面/品牌 Logo/单人/光线），并把结论写进来源表。
+
 ### URL 形态与 token（两个实测坑）
 
 - `search` 给的是 `https://www.xiaohongshu.com/search_result/<note-id>?xsec_token=<T>&xsec_source=`

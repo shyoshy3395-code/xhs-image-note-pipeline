@@ -18,6 +18,7 @@
 | `03-locks.md` | 阶段 2/3 出图 | `scripts/run_image_note.py` | 人脸/服装/比例/质感/禁止 五块锁 + 首图机位 |
 | `04-nine-groups.md` | 阶段 2 Y–AG | Agent + `scripts/check_action_distribution.py` | 9 组输出格式 + 分布配额 |
 | `05-copywriting.md` | 阶段 3 C/D/E | Agent（读知识库后写）| 标题/正文/话题规格 + 知识库调用规则 |
+| `06-space-profiles.md` | 阶段 2 抽动作 | `pipeline_loader.py --space X --top N` | **按空间批量推荐动作**的空间画像（可用环境物 / 族权重 / 避开项）|
 
 ## 占位符（脚本会替换，别删花括号）
 
