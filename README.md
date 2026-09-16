@@ -100,7 +100,8 @@ references/03-action-library.md ─┘                          │
 | `xlsx_surgery.py` / `assemble_image_note.py` / `verify_image_note_xlsx.py` | **保住 DISPIMG 的 xlsx 手术与交付闸门**（本仓库只含生成侧脚本） |
 | `check_action_distribution.py` | 动作组配额闸门 |
 
-想补齐这一层（让仓库能端到端跑通回填），把上面这些一起开源即可。
+回填层（xlsx 手术与交付闸门）属上游内部件，**本仓库有意只公开生成侧**：方法论可学、生成侧可跑；
+要把这套流程用到自己的表上，按上面的坑位说明自行实现即可。
 
 ## 合规与边界
 
