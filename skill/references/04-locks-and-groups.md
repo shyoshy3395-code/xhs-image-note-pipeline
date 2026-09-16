@@ -3,7 +3,7 @@
 > 来源：2026-09-13 / 09-14 两轮实测（同一套参考图，先 8 组后 9 组）。**块体逐字复用**，
 > 只改每组的「机位｜景别｜动作｜视线｜接触关系｜光影变化」六个槽位。
 > 配套：`scripts/assemble_image_note.py`（回填）、`scripts/verify_image_note_xlsx.py`（闸门）、
-> `references/07-image-gen-constraints.md`（约束/机位表/降噪与导出质量）。
+> `《约束与排障》`（约束/机位表/降噪与导出质量）。
 
 ---
 

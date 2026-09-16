@@ -145,7 +145,7 @@ opencli xiaohongshu download "https://www.xiaohongshu.com/explore/<note-id>?xsec
 
 → **结论不是「哪个形态对」，而是「别自己改写 URL」**：
 优先**原样搬运搜索 JSON 的 `url` 字段**；被拒再试改写形态（两形态互为备选）。
-判据永远是 `ok: true / success`，不是"文档说支持"。同类现象见 `13-cover-download-ops.md` §一。
+判据永远是 `ok: true / success`，不是"文档说支持"。同类现象见 `《封面下载运维》` §一。
 
 ### ★ AH 列：平台穿搭热门话题 5 个（2026-09-19 新增产出）
 

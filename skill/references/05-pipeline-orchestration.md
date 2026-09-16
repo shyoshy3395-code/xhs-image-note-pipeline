@@ -99,7 +99,7 @@ python3 scripts/verify_image_note_xlsx.py ...  # 交付闸门：锚点/DISPIMG/�
 
 ## 五、已知坑（改提示词前先读）
 
-1. `xlsx_surgery` 行高解析曾被 `customHeight="1"` 劫持 → 图缩成 15×20px（见 `08-xlsx-embed-pitfalls.md`）
+1. `xlsx_surgery` 行高解析曾被 `customHeight="1"` 劫持 → 图缩成 15×20px（见 `《xlsx 内嵌坑位》`）
 2. 先改行高再算图尺寸 → 图永远按旧行高缩放（同上）
 3. 一次调用必须写**全部浮图**（新增 + 模板已有），否则旧浮图变死链
 4. vip 不支持并发，必须串行；且两边都要 16 的倍数
