@@ -5,7 +5,7 @@
 设计原则：**本脚本不含任何提示词正文**。
 - 提示词 → 由 pipeline_loader 从 `prompts/*.md` 实时装配（改提示词请改 prompts/，不要改这里）
 - 素材 → 由 pipeline_loader 从 `knowledge_base` 实时拉取（定位/卖点/禁用词/参照成品）
-- 动作 → 由 pipeline_loader 从 `references/10-action-library.md` 实时抽条（按配额 + 空间适配）
+- 动作 → 由 pipeline_loader 从 `references/` 下的【动作提示词库】实时抽条（按配额 + 空间适配；`10-` / `03-` 两种命名均兼容）
 
 流程：首图 X（环境 + 人脸 + 上身 + 平铺 多图参考）→ 各组以首图为唯一参考走 edit 链路。
 纪律：串行（vip 不支持并发）· 可续跑（已存在即跳过）· 失败重试 5 次退避 20s · 读产物一律 glob。
