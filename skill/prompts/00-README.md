@@ -5,7 +5,7 @@
 
 ## 改法（唯一正确路径）
 
-1. 只改 **default 源库**：`~/.hermes/skills/productivity/./prompts/`
+1. 只改 **default 源库**：`skill/prompts/`
 2. 跑 `bash ~/.hermes/sync_skills.sh` → 推到 5 个角色（角色副本是只读的，直接改留不住）
 3. 验证：`python3 scripts/pipeline_loader.py --check`
 
@@ -30,7 +30,7 @@
 | `{{渠道语气}}` | `knowledge_base/05-channel.md`（双轨口径 D1） |
 | `{{参照成品}}` | `knowledge_base/02a-单品渠道文案.md`（99 件四通道成品） |
 | `{{环境}}` | 阶段 1 的反推结果（P 列内容） |
-| `{{动作条目}}` `{{机位}}` `{{景别}}` `{{视线}}` `{{接触}}` | `references/10-action-library.md`（11 族 112 条，自动抽条） |
+| `{{动作条目}}` `{{机位}}` `{{景别}}` `{{视线}}` `{{接触}}` | `references/03-action-library.md`（11 族 132 条，自动抽条） |
 | `{{参考图位次}}` | 模板实际列位（Q 或 O）|
 
 ## 纪律

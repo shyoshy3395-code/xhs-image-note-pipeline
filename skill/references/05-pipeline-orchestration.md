@@ -11,7 +11,7 @@
 ```
 prompts/*.md  ─┐
 knowledge_base ─┤→  scripts/pipeline_loader.py  →  提示词包 pkg.json + 九组骨架 md
-10-action-library.md ─┘                                        │
+03-action-library.md ─┘                                        │
                                                                ▼
                     scripts/run_image_note.py（串行 · 可续跑 · 重试）
                                     │  X 首图 + F–N 各组图
@@ -29,7 +29,7 @@ knowledge_base ─┤→  scripts/pipeline_loader.py  →  提示词包 pkg.json
 
 ## 二、四个阶段
 
-### 阶段 0 · 抓封面（读 `prompts/01-cover-filter.md` + `09-xhs-cover-sourcing.md`）
+### 阶段 0 · 抓封面（读 `prompts/01-cover-filter.md` + `02-xhs-cover-sourcing.md`）
 
 ```bash
 # 搜索（走代理）
@@ -81,7 +81,7 @@ python3 scripts/verify_image_note_xlsx.py ...  # 交付闸门：锚点/DISPIMG/�
 | 人脸/服装/比例/质感/禁止 五块锁 + 首图机位 | `prompts/03-locks.md` | 立即（出图脚本直接读） |
 | 9 组配额 / 输出格式 / 生活化交互 | `prompts/04-nine-groups.md` | 立即（loader 的 QUOTA 表需同步改脚本常量） |
 | 标题字数 / 正文段数 / 话题数 / 知识库取料顺序 | `prompts/05-copywriting.md` | 立即 |
-| 动作条目本身 | `references/10-action-library.md` | 立即（loader 解析表格） |
+| 动作条目本身 | `references/03-action-library.md` | 立即（loader 解析表格） |
 
 改完必做：`bash ~/.hermes/sync_skills.sh`（5 个角色副本是只读的，改源库才留得住）
 

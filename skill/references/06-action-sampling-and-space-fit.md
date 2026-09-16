@@ -1,6 +1,6 @@
 # 12 · 动作抽条的两个坑：逐行重复 & 空间不符（2026-09-17 实测）
 
-> 场景：`pipeline_loader.py` 从 `references/10-action-library.md` 按配额抽 9 组动作。
+> 场景：`pipeline_loader.py` 从 `references/03-action-library.md` 按配额抽 9 组动作。
 > 本文记录「抽出来的组没法用」的两类失败，以及配套的修法（都已落地在代码与
 > `prompts/06-space-profiles.md` 里）。
 

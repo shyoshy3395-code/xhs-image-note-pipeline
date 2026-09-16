@@ -1,6 +1,6 @@
 # 10 · 【动作提示词库】（街拍 / 空间 / 视频分镜通用）
 
-> **名称：【动作提示词库】**（编号 `A01` · 文件 `references/10-action-library.md`）
+> **名称：【动作提示词库】**（编号 `A01` · 文件 `references/03-action-library.md`）
 > 本库**唯一正式名称**——其他叫法（动作库 / 动作词库 / 动作素材库 / 动作条目库）一律以此为准；
 > 对外引用、触发词、回复里提到本库时都用**【动作提示词库】**。
 
@@ -8,8 +8,6 @@
 > 不要每行重新想。目标：同一个模特、同一套衣服、同一个空间，做出**互不重复、又都不像摆拍**的动作。
 > 口径来源：0913 / 0914 两轮实测（行2 街拍 · 行3 清水混凝土空间）+ 品牌调性「自在·真实·蓬勃 / 不费力的在场感」。
 
-> ⚠️ **维护权（治理）**：本库**全员可调动，仅 Aim 可修改**。
-> 要改 → 改源库 `~/.hermes/skills/productivity/./references/10-action-library.md`
 > → 跑 `bash ~/.hermes/sync_skills.sh`。5 个角色 profile 的副本是**只读**的，改了也会被下次同步覆盖。
 > 其他角色（COCO / Coni / Neo / Shane）只读引用，需改请在 Aim 会话里提出。
 
@@ -390,10 +388,10 @@
 
 ```bash
 PY=~/.hermes/python3
-S=~/.hermes/profiles/文案角色/skills/productivity/./scripts/check_action_distribution.py
+S=skill/scripts/check_action_distribution.py
 
 # ① 自检本文档里的所有范例（默认 --all）
-$PY $S ~/.hermes/profiles/文案角色/skills/productivity/./references/10-action-library.md
+$PY $S skill/references/03-action-library.md
 
 # ② 自检某行的运行器（直接从 GROUPS 里抽，不用手抄）
 $PY $S ~/Desktop/Hermes/图片笔记0914_工作文件/行4_runner.py --groups 9

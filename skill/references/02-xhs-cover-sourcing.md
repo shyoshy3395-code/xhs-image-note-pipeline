@@ -273,7 +273,7 @@ for c, r, cx, cy in re.findall(r'<xdr:col>(\d+)</xdr:col>.*?<xdr:row>(\d+)</xdr:
 
 ## 五、给反推阶段的衔接
 
-封面确定后，P 列**只反推【环境与拍摄】**（五段契约见 `08-reverse-prompt-spec.md` §二），
+封面确定后，P 列**只反推【环境与拍摄】**（五段契约见 `01-reverse-prompt-spec.md` §二），
 并把这套环境写进 X 列首图的提示词。首图生成时**同时给 O 封面 + Q 人脸 + R/S 上身 + T 平铺**，
 并在提示词里显式声明一句使用规则：
 
