@@ -132,7 +132,11 @@ def main() -> int:
         print("  首图已存在，跳过", flush=True)
     else:
         manifest.append(gen(hero_prompt, hero_base, refs, f"X{a.row}首图", env, size, model))
-    hero_ref = shrink(sorted(glob.glob(hero_base + ".*"))[0], cache, 1024)
+    _hero_hits = glob.glob(hero_base + ".*")
+    if not _hero_hits:                      # 首图失败必须中止：组图以它为一致性锚点，硬跑只会得到另一套人/衣
+        print("⛔ 首图未生成，已中止（脚本可续跑：修好后重跑，已完成的图会跳过）", file=sys.stderr)
+        return 1
+    hero_ref = shrink(sorted(_hero_hits)[0], cache, 1024)
 
     cols = "FGHIJKLMN"
     for i, gp in enumerate(group_prompts, 1):

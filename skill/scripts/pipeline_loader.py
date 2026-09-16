@@ -206,7 +206,7 @@ def load_actions() -> list[dict]:
     return rows
 
 
-def sample_actions(groups: int, items: list[dict], space: str = "", rotate: int = 0) -> list[dict]:
+def sample_actions(groups: int, items: list[dict], space: str = "", rotate: int = 0, extra_avoid: str = "") -> list[dict]:
     """按配额给槽位配动作：四轮放宽（机位+景别 → 仅景别 → 仅机位 → 任取），被禁用（❌）的跳过。
 
     - space 命中 prompts/06-space-profiles.md 的画像时：① 按「可用环境物」过滤需要不存在道具的动作；
@@ -217,6 +217,8 @@ def sample_actions(groups: int, items: list[dict], space: str = "", rotate: int 
     """
     props, prof = resolve_space(space)
     avoid = [x for x in prof.get("avoid", []) if x]
+    # --avoid：按「当次造型」追加排除词（例：这套没有包/腕表 → --avoid 包,腕表,咖啡杯）
+    avoid += [x.strip() for x in re.split(r"[,，/、]", extra_avoid) if x.strip()]
 
     def env_fit(a) -> bool:
         need = a.get("env_need") or ""
@@ -616,6 +618,7 @@ def main() -> int:
     ap.add_argument("--top", type=int, default=0, help="按空间批量推荐 N 条（配 --space，如 --space 咖啡馆 --top 20）")
     ap.add_argument("--emit-space", default="", help="把空间推荐结果导出为 MD")
     ap.add_argument("--force", action="store_true", help="--append 时跳过入库校验（不建议）")
+    ap.add_argument("--avoid", default="", help="按当次造型追加排除词（逗号分隔，如 包,腕表,咖啡杯）")
     a = ap.parse_args()
 
     if a.check:
@@ -662,7 +665,8 @@ def main() -> int:
         "facts": {"aspect": "3:4", "size_1k": "864x1152", "model": "gpt-image-2-vip", "need_serial": True},
     }
     # 按行号自动位移候选池 → 不同行抽出不同九组（同一 space 也能有变化）
-    pkg["actions"] = sample_actions(a.groups, load_actions(), a.space, rotate=(a.row or 0) * 11)
+    pkg["actions"] = sample_actions(a.groups, load_actions(), a.space, rotate=(a.row or 0) * 11,
+                                     extra_avoid=a.avoid)
     pkg["quota_violations"] = check_quota(pkg["actions"], a.groups)
     pkg["groups_skeleton"] = render_group_lines(pkg["actions"])
     if pkg["quota_violations"]:
