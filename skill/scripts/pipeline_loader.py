@@ -56,12 +56,19 @@ QUOTA = {
     8: [("正面", "全身", "看镜头"), ("正面", "半身", "看向画外"), ("3-4侧", "全身", "看向画外"),
         ("3-4侧", "七分", "低头"), ("3-4侧", "半身", "看向画外"), ("全侧", "全身", "看向画外"),
         ("全侧", "七分", "看向画外"), ("背面", "全身", "不可见")],
+    # 9r = 2026-09-18 客户放宽版（正面全身≥2 · 3-4侧≥1 · 全侧≥1 · 背面全身≥1 · 七分≥1 · 半身≥1 · 特写≥1）
+    "9r": [("正面", "全身", "看镜头"), ("正面", "全身", "看向画外"), ("3-4侧", "七分", "看向画外"),
+           ("3-4侧", "半身", "低头"), ("全侧", "全身", "看向画外"), ("全侧", "半身", "看向画外"),
+           ("背面", "全身", "不可见"), ("背面", "七分", "低头"), ("正面", "局部特写", "不可见")],
 }
 QUOTA_FLOOR = {   # 闸门用：各维度下限（与 04-nine-groups.md 的配额表一致）
     9: {"机位": {"正面": 2, "3-4侧": 2, "全侧": 1, "背面": 1},
         "景别": {"全身": 4, "七分": 2, "半身": 2, "局部特写": 1}, "看镜头": 2},
     8: {"机位": {"正面": 2, "3-4侧": 3, "全侧": 2, "背面": 1},
         "景别": {"全身": 4, "七分": 2, "半身": 2}, "看镜头": 2},
+    # 放宽版下限（客户 2026-09-18 口径）
+    "9r": {"机位": {"正面": 2, "3-4侧": 1, "全侧": 1, "背面": 1},
+           "景别": {"全身": 4, "七分": 1, "半身": 1, "局部特写": 1}, "看镜头": 2},
 }
 CAM_ALIAS = {"正面": ("正面",), "3-4侧": ("3-4侧", "3-4侧(过肩)", "3-4侧(俯拍)", "3-4侧(仰拍)"),
              "全侧": ("全侧", "全侧(跟拍)"), "背面": ("背面", "背面(过肩)")}
@@ -619,6 +626,8 @@ def main() -> int:
     ap.add_argument("--emit-space", default="", help="把空间推荐结果导出为 MD")
     ap.add_argument("--force", action="store_true", help="--append 时跳过入库校验（不建议）")
     ap.add_argument("--avoid", default="", help="按当次造型追加排除词（逗号分隔，如 包,腕表,咖啡杯）")
+    ap.add_argument("--quota", choices=["std", "relaxed"], default="std",
+                    help="配额口径：std=严格版（正面2/3-4侧2/全侧≥1/背面≥1 景别全身4/七分2/半身2/特写1）；relaxed=放宽版（3-4侧≥1/七分≥1/半身≥1，客户 2026-09-18 口径）")
     a = ap.parse_args()
 
     if a.check:
@@ -664,10 +673,12 @@ def main() -> int:
                "banned": kb_banned(), "refs": kb_channel_examples(2)},
         "facts": {"aspect": "3:4", "size_1k": "864x1152", "model": "gpt-image-2-vip", "need_serial": True},
     }
-    # 按行号自动位移候选池 → 不同行抽出不同九组（同一 space 也能有变化）
-    pkg["actions"] = sample_actions(a.groups, load_actions(), a.space, rotate=(a.row or 0) * 11,
+    # 按行号自动位移候选池 → 不同行抽出不同九组；--quota relaxed 切到放宽版配额表
+    _qkey = a.groups if a.quota == "std" else (f"{a.groups}r" if f"{a.groups}r" in QUOTA else a.groups)
+    pkg["quota_profile"] = _qkey
+    pkg["actions"] = sample_actions(_qkey, load_actions(), a.space, rotate=(a.row or 0) * 11,
                                      extra_avoid=a.avoid)
-    pkg["quota_violations"] = check_quota(pkg["actions"], a.groups)
+    pkg["quota_violations"] = check_quota(pkg["actions"], _qkey)
     pkg["groups_skeleton"] = render_group_lines(pkg["actions"])
     if pkg["quota_violations"]:
         print("  ⚠️ 配额未达标（请在 prompts/04-nine-groups.md 放宽或手工补）："
