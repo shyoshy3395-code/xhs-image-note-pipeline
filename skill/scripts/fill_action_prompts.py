@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """【动作提示词库】· 动作提示词列回写工具（机位 / 远近 / 人体动作 三段式）
 
-用途：给 `references/10-action-library.md` 的**基础规则/实测族**（W S C T H P G M D E）
+用途：给 `references/10-action-library.md` 的**全部 11 族**（W S C T H P G M D E X）
      逐条生成一列「动作提示词」，只描述三件事：
        ① 拍摄角度机位  ② 拍摄远近（景别）  ③ 人体动作
      不描述人物外貌，也不描述主体服装（原因：人脸/服装由锁块与参考图负责，写进来只会互殴）。
@@ -14,10 +14,10 @@
   python3 scripts/fill_action_prompts.py --scan          # 只扫禁用词（外貌/服装）
 
 设计约束（重要）：
-- 新列加在**表尾**（「风险」之后）。原因：`pipeline_loader.py --append` 按 7 段写入，
-  若把新列插在中间，`--append` 写的新行会把「风险」挤进新列 → 静默错位。
+- 新列加在**表尾**（基础族在「风险」之后；X 族在「来源」之后）。原因：`pipeline_loader.py --append`
+  按 7 段写入，若把新列插在中间，`--append` 写的新行会把「风险」挤进新列 → 静默错位。
 - `pipeline_loader.load_actions()` 是**按表头名**取列的，加列不影响它解析/计数。
-- 不改 X 族（真实爆款反推族自带来源列，单独治理）。
+- X 族片段自带前导景别（「全身，正在…」）与本列「远近」重复 → 生成时**剥掉前导景别词**。
 
 禁用项（`--scan` 会拦，回写前必须 0 命中）：
   外貌类：五官/妆容/肤/发色/发型/身材/年龄/气质…
@@ -48,10 +48,13 @@ def lib_path() -> str:
             return p
     raise FileNotFoundError("找不到【动作提示词库】。候选：" + "、".join(LIB_CANDIDATES))
 
-# 只处理基础族（X 族为真实爆款反推族，另有来源列，不在本工具职责内）
-BASE_FAMS = list("WSCTHPGMDEX")[:-1]
+# 全部 11 族（W S C T H P G M D E X）；X 族为真实爆款反推族，列结构多「归入族/来源」两列
+ALL_FAMS = list("WSCTHPGMDEX")
 
 NEW_COL = "动作提示词（机位·远近·动作）"
+
+# X 族片段自带前导景别（「全身，正在…」/「七分景，正在…」）→ 剥掉，避免与「远近」段重复
+LEAD_SHOT_RE = re.compile(r"^(全身|七分|半身|局部特写|全景空镜带人)(景)?[，,、;；\s]*")
 
 # 视角 → 机位·高度（高度：平视 / 俯拍 / 仰拍 / 跟拍 / 过肩）
 CAM_BASE = {"正面": "正面", "3-4侧": "3-4侧", "全侧": "全侧", "背面": "背面"}
@@ -126,6 +129,7 @@ def cam_str(raw: str) -> str:
 
 def compose(frag: str, cam: str, shot: str, no: str) -> str:
     act = OVERRIDES.get(no, frag).strip().rstrip("。")
+    act = LEAD_SHOT_RE.sub("", act).strip()          # 剥掉片段自带的前导景别（X 族常见）
     return f"机位：{cam} ｜ 远近：{shot} ｜ 动作：{act}"
 
 
@@ -144,9 +148,9 @@ def main() -> int:
     lib = lib_path()
     lines = read(lib).splitlines()
     rows = parse_rows(lines)
-    base = [(f, i, c, cl) for (f, i, c, cl) in rows if f in BASE_FAMS]
+    base = [(f, i, c, cl) for (f, i, c, cl) in rows if f in ALL_FAMS]
     print(f"库：{lib}")
-    print(f"基础族条目 {len(base)} 条（族：{'/'.join(BASE_FAMS)}）· 表尾新列「{NEW_COL}」\n")
+    print(f"条目 {len(base)} 条（族：{'/'.join(ALL_FAMS)}）· 表尾新列「{NEW_COL}」\n")
 
     if a.scan:
         # 闸门只看**成稿**（覆盖稿生效后的值）；原片段命中但已被覆盖稿改写 → 仅提示，不算失败。
@@ -193,10 +197,10 @@ def main() -> int:
         if a.dry:
             print(f"{no:>4} {cells[1][:8]:<9} {val}")
 
-    # 表头补新列（加在表尾）；X 族表（含「归入族」）不动
+    # 表头补新列（加在表尾）；条目表＝含「编号+动作名+提示词片段」的表（来源表不含动作名）
     heads = [i for i, l in enumerate(lines)
              if l.strip().startswith("|") and "编号" in l and "动作名" in l
-             and "提示词片段" in l and "归入族" not in l]
+             and "提示词片段" in l]
     added_heads = 0
     for i in heads:
         cells = [c.strip() for c in lines[i].strip().strip("|").split("|")]

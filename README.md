@@ -99,6 +99,8 @@ references/03-action-library.md ─┘                          │
 | 《封面下载运维》 | 平台链接形态变化、代理按域名分流、节流与续跑 |
 | `xlsx_surgery.py` / `assemble_image_note.py` / `verify_image_note_xlsx.py` | **保住 DISPIMG 的 xlsx 手术与交付闸门**（本仓库只含生成侧脚本） |
 | `check_action_distribution.py` | 动作组配额闸门 |
+| `qc_face_match.py` | 人脸一致性核验（要解析 xlsx 里 `cellimages.xml` / DISPIMG 内部结构，属私有的回填层；方法说明见 `skill/references/05-pipeline-orchestration.md` 第 29 条） |
+| `templates/batch_row_driver.py` | 行级批量驱动起步件（多行续跑 / 定向返工用；本仓库未带 `templates/` 目录） |
 
 回填层（xlsx 手术与交付闸门）属上游内部件，**本仓库有意只公开生成侧**：方法论可学、生成侧可跑；
 要把这套流程用到自己的表上，按上面的坑位说明自行实现即可。
