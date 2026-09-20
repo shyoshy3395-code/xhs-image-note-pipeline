@@ -31,11 +31,27 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from pipeline_loader import render_prompt  # noqa: E402
+from pipeline_loader import render_prompt_for_gen, EN_CONSTRAINT  # noqa: E402
 
 HOME = os.path.expanduser("~")
-PY = os.path.join(HOME, ".hermes/python3")
-NB = os.path.join(HOME, ".hermes/skills/creative/nano-banana-image/scripts/image_api.py")
+
+# 生图执行器解析顺序：环境变量 → **同目录 image_api.py**（对外版仓库自带）→ 本地 Hermes 技能库。
+# 教训（2026-09-20）：原来硬编码本地技能库路径，导出后对外版用户的出图链路直接断（路径不存在 + 参数不兼容）。
+NB = (os.environ.get("IMAGE_API_SCRIPT")
+      or next((p for p in (os.path.join(HERE, "image_api.py"),
+                           "",
+                           "")
+               if os.path.exists(p)), ""))
+# 解释器解析顺序：环境变量 → 本地 Hermes venv → **当前解释器**（对外版用户走最后一支）
+PY = (os.environ.get("IMAGE_PY")
+      or next((p for p in ("",
+                           "", sys.executable)
+               if os.path.exists(p)), sys.executable))
+
+# 三个"出图前就注定失败"的自检（省得跑一半才发现路径/参数不对）
+if not NB:
+    print("⚠️ 找不到生图执行器：请在 .env 或环境变量里给 IMAGE_API_SCRIPT，"
+          "或把 image_api.py 放在本脚本同目录", file=sys.stderr)
 
 
 def child_env() -> dict:
@@ -44,12 +60,21 @@ def child_env() -> dict:
     for v in ("http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY"):
         env.pop(v, None)
     env["NO_PROXY"] = "localhost,127.0.0.1"
-    for p in (os.path.join(HOME, ".hermes/.env"), os.path.join(HOME, ".hermes/profiles/文案角色/.env")):
+    # ① 通用名（对外版 .env.example 口径）：仓库根 / 当前目录的 .env
+    for p in (os.path.join(HERE, "..", "..", ".env"), os.path.join(os.getcwd(), ".env")):
+        if os.path.exists(p):
+            for line in open(p, encoding="utf-8", errors="ignore"):
+                line = line.strip()
+                for k in ("IMAGE_API_KEY", "IMAGE_BASE_URL", "IMAGE_MODEL"):
+                    if line.startswith(f"{k}=") and not env.get(k):
+                        env[k] = line.split("=", 1)[1].strip().strip('"').strip("'")
+    # ② 本地 Hermes 专用名（旧路径，保留兼容）
+    for p in ("", ""):
         if os.path.exists(p):
             for line in open(p, errors="ignore"):
                 if line.strip().startswith("生图接口_API_KEY="):
                     env["生图接口_API_KEY"] = line.split("=", 1)[1].strip()
-                    env["生图接口_ENV_FILE"] = os.path.join(HOME, ".hermes/.env")
+                    env["生图接口_ENV_FILE"] = ""
                     return env
     return env
 
@@ -124,8 +149,8 @@ def main() -> int:
     locks = pkg["prompts"]["locks_body"].replace("{{服装锁词}}", pkg["garment_lock"])
     hero_prompt = (f"3:4 竖构图真实生活随手拍首图。\n"
                    f"【空间与光影·照此重建】{pkg['env']}\n"
-                   f"{pkg['prompts']['ref_rule']}\n{locks}\n{pkg['prompts']['hero_position']}")
-    group_prompts = [render_prompt(pkg, i) for i in range(1, groups + 1)]
+                   f"{pkg['prompts']['ref_rule']}\n{locks}\n{pkg['prompts']['hero_position']}\n{EN_CONSTRAINT}")
+    group_prompts = [render_prompt_for_gen(pkg, i) for i in range(1, groups + 1)]
 
     if a.dry:
         print("═══ 首图 X prompt ═══\n" + hero_prompt[:1200])

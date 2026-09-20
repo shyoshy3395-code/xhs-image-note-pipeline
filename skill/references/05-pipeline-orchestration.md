@@ -52,7 +52,7 @@ opencli xiaohongshu search "#ootdinspo" -f json --limit 15
 ### 阶段 2 · 出图（读 `prompts/03-locks.md` + `04-nine-groups.md` + **【动作提示词库】**）
 
 ```bash
-cd ~/.hermes/skills/productivity/.
+cd <本仓库>/skill
 python3 scripts/pipeline_loader.py --row 2 --item "<知识库单品名>" --groups 9 \
     --env "<阶段1 的 P 列英文>" --garment-lock "<服装锁词>" --space "墙面,玻璃门,路缘" \
     --out /tmp/pkg_row2.json --emit-groups /tmp/groups_row2.md
@@ -91,7 +91,6 @@ python3 scripts/verify_image_note_xlsx.py ...  # 交付闸门：锚点/DISPIMG/�
 | 标题字数 / 正文段数 / 话题数 / 知识库取料顺序 | `prompts/05-copywriting.md` | 立即 |
 | 动作条目本身 | `references/03-action-library.md` | 立即（loader 解析表格） |
 
-改完必做：`bash ~/.hermes/sync_skills.sh`（5 个角色副本是只读的，改源库才留得住）
 
 ---
 
@@ -211,7 +210,7 @@ python3 scripts/verify_image_note_xlsx.py ...  # 交付闸门：锚点/DISPIMG/�
     但 `qc_contact_sheet.py` 的接触表里**只有成图、没有参考人脸** —— 它只能验「行内是不是同一张脸」，
     **验不了「是不是模板里那个人」**。所以出图后要跑第二张表：
     ```bash
-    python3 scripts/qc_face_match.py <工作目录> <交付.xlsx> 2 3 4 5 6 --out ~/Desktop/Hermes
+    python3 scripts/qc_face_match.py <工作目录> <交付.xlsx> 2 3 4 5 6 --out 本地工作区
     # → 人脸一致性核验.jpg（上排＝Q 列 DISPIMG 参考人脸原图／下排＝该行生成首图）
     ```
     **抽取原理**（要手搓就照这个走）：`xl/cellimages.xml` 里每个 `<xdr:pic>` 带 `name="ID_XXXX"`，

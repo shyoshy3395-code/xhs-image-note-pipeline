@@ -36,7 +36,6 @@
 
 > ⚠️ **写不了的原因**：`skill_manage` 的写文件护栏只放行 `assets / references / scripts / templates`——
 > `prompts/` 下的文件**必须用普通文件编辑**（execute_code / write_file / patch 工具直接改 skill 目录里的文件），
-> 改完照样要跑 `bash ~/.hermes/sync_skills.sh` 同步 5 个角色。
 > 同类需要在 `prompts/` 里落地的规则改动，都要走这条路径，不要以为「patch 报错＝这条规则没法落地」。
 
 - `SKILL.md` 流水线顺序 ① ③ 两步已同步（2026-09-18）

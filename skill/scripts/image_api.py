@@ -90,12 +90,41 @@ def generate(prompt: str, refs: list[str] | None = None, model: str | None = Non
     return None
 
 
+SIZE_PRESETS = {"1K": "1024x1536", "2K": "2048x3072", "4K": "3584x5376"}
+
+
+def resolve_size(size: str | None, aspect: str | None) -> str:
+    """把「精确像素 / 尺寸档 / 比例」归一成接口要的像素 WxH。
+
+    · 调用方直接给精确像素（如 `--aspect 864x1152`）→ 原样用
+    · 给尺寸档（`--size 2K`）→ 查 SIZE_PRESETS
+    · 只给比例（`--aspect 3:4`）→ 按 1024 宽换算
+    · 认不出的档位 → **原样透传**（有的网关自己认 "2K"，不替你猜）
+    """
+    for v in (aspect, size):
+        if v and "x" in v.lower():
+            return v
+    if size and size.upper() in SIZE_PRESETS:
+        return SIZE_PRESETS[size.upper()]
+    if aspect and ":" in aspect:
+        w, h = (int(x) for x in aspect.split(":")[:2])
+        return f"1024x{round(1024 * h / w)}"
+    return size or "1024x1536"
+
+
 if __name__ == "__main__":
     import argparse
-    ap = argparse.ArgumentParser(description="测试生图接口连通性")
+    ap = argparse.ArgumentParser(
+        description="生图执行器（可单独测连通性，也被 run_image_note.py 按同一套参数调用）")
     ap.add_argument("--prompt", default="a calm street corner, film photograph")
     ap.add_argument("--out", default="/tmp/image_api_test.png")
-    ap.add_argument("--size", default="1024x1536")
+    ap.add_argument("--size", default="1024x1536", help="尺寸档（1K/2K/4K）或精确像素 WxH")
+    ap.add_argument("--aspect", default=None, help="比例（3:4）或精确像素 WxH；与 --size 二者给一个即可")
+    ap.add_argument("--model", default=None, help="覆盖 .env 里的 IMAGE_MODEL")
+    ap.add_argument("--image", action="append", default=[], help="参考图路径，可重复（给即走 images/edits）")
+    ap.add_argument("--timeout", type=int, default=400)
     a = ap.parse_args()
-    p = generate(a.prompt, None, None, a.size, a.out)
-    print("✅ 成功:", p, os.path.getsize(p) if p else "")
+    px = resolve_size(a.size, a.aspect)
+    p = generate(a.prompt, a.image or None, a.model, px, a.out, timeout=a.timeout)
+    print(("✅ 成功:" if p else "❌ 失败:"), p or "", os.path.getsize(p) if p else "")
+    raise SystemExit(0 if p else 1)

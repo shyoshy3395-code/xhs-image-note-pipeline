@@ -9,7 +9,7 @@
 
 用法：
     python3 qc_contact_sheet.py <工作目录> 2 3 4 5 6
-    python3 qc_contact_sheet.py <工作目录> 2 --size 420 --out ~/Desktop/Hermes
+    python3 qc_contact_sheet.py <工作目录> 2 --size 420 --out 本地工作区
 产物：
     <out>/行N_质检.jpg   —— 5 列 × 2 行（左上＝首图，其余＝组1..9），每张上方标文件名
 
@@ -25,7 +25,7 @@ import sys
 try:
     from PIL import Image, ImageDraw, ImageFont
 except ImportError:
-    sys.exit("需要 Pillow：~/.hermes/python3 -m pip install pillow")
+    sys.exit("需要 Pillow：python3 -m pip install pillow")
 
 FONT_CANDIDATES = [
     "/System/Library/Fonts/PingFang.ttc",

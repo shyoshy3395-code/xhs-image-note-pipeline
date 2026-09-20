@@ -36,11 +36,15 @@ python3 skill/scripts/run_image_note.py --pkg /tmp/pkg.json --row 2 \
     --outdir ./out/row2 --cover cover.jpg --face face.png --up1 up1.jpg --up2 up2.jpg --flat flat.jpg --dry
 ```
 
-出图需要一个兼容 OpenAI 格式的生图接口（脚本默认 `gpt-image-2-vip`）。把 key 放进 `.env`：
+出图需要一个兼容 OpenAI 格式的生图接口。把 key 放进 `.env`：
 
 ```bash
-cp .env.example .env    # 填 IMAGE_API_KEY / IMAGE_BASE_URL / 模型名
+cp .env.example .env    # 填 IMAGE_API_KEY / IMAGE_BASE_URL
 ```
+
+模型从 `.env` 的 `IMAGE_MODEL` 读（`.env.example` 示例填 `gpt-image-2-vip`，不填则用 `gpt-image-1`）。
+`nano-banana*` 族走比例+尺寸档（`--model nano-banana-pro --size 2K`），`gpt-image-*` 族直接给像素（`--aspect 864x1152`）。
+执行器默认用本仓库自带的 `skill/scripts/image_api.py`；要换成你自己的，给环境变量 `IMAGE_API_SCRIPT`。
 
 ## 目录
 
@@ -48,21 +52,30 @@ cp .env.example .env    # 填 IMAGE_API_KEY / IMAGE_BASE_URL / 模型名
 skill/
 ├── SKILL.md                 给 Agent 用的技能说明（Hermes / Claude Code 均可读）
 ├── prompts/                 ✏️ 提示词配方（改这里＝改行为，脚本实时读取、不缓存）
-│   ├── 01-cover-filter.md   封面合格标准与红线
-│   ├── 02-reverse-reasoning.md  反推 5 段式 + 必须剥离清单
-│   ├── 03-locks.md          五块锁（人脸/服装/比例/质感/禁止）+ 首图机位
-│   ├── 04-nine-groups.md    9 组输出格式 + 配额矩阵
-│   └── 05-copywriting.md    文案规格 + 知识库取料顺序
+│   ├── 00-README.md             怎么改 · 占位符表 · 文件↔阶段对应
+│   ├── 01-cover-filter.md       封面合格标准与红线
+│   ├── 02-reverse-reasoning.md  反推 6 段式（场景/光影/镜头/色调/关键词/搭配）+ 必须剥离清单
+│   ├── 03-locks.md              五块锁（人脸/服装/比例/质感/禁止）+ 首图机位
+│   ├── 04-nine-groups.md        9 组输出格式 + 配额矩阵
+│   ├── 05-copywriting.md        文案规格 + 知识库取料顺序
+│   └── 06-space-profiles.md     空间画像（按空间批量推荐动作时读它）
 ├── scripts/
-│   ├── pipeline_loader.py   🧩 装配器：提示词 + 知识库 + 【动作提示词库】 → 提示词包（内置配额闸门/空间适配）
-│   └── run_image_note.py    🚀 运行器：串行 / 可续跑 / 重试；**脚本内零提示词正文**
+│   ├── pipeline_loader.py       🧩 装配器：提示词 + 知识库 + 【动作提示词库】 → 提示词包（内置配额闸门/空间适配）
+│   ├── run_image_note.py        🚀 运行器：串行 / 可续跑 / 重试；**脚本内零提示词正文**
+│   ├── fill_action_prompts.py   ✍️ 动作提示词三段式（机位·远近·动作）生成 / 校验
+│   ├── qc_contact_sheet.py      🔍 出图后把「首图＋9 组」拼成大图，交视觉模型逐张核对
+│   └── image_api.py             生图接口封装（兼容 OpenAI 格式）
 └── references/
-    ├── 01-reverse-prompt-spec.md   反推规格
-    ├── 02-xhs-cover-sourcing.md    封面抓取纪律（含下载被拒的解法）
-    ├── 03-action-library.md        🎬 动作提示词库（11 族、六槽位值域、抽组配比）
-    └── 04-locks-and-groups.md      锁块与分布矩阵速查
+    ├── 01-reverse-prompt-spec.md              反推规格（含动作写法与抽组顺序）
+    ├── 02-xhs-cover-sourcing.md               封面抓取纪律（含下载被拒的解法）
+    ├── 03-action-library.md                   🎬 【动作提示词库】：11 族 133 条（+27 条真实爆款反推）/ 三段式动作提示词 / 六槽位值域 / 抽组配比
+    ├── 04-locks-and-groups.md                 锁块与分布矩阵速查
+    ├── 05-pipeline-orchestration.md           流水线总纲（阶段 0–3 · 命令序列 · 闸门 · 29 条已知坑）
+    ├── 06-action-sampling-and-space-fit.md    动作抽条两坑（逐行重复 / 空间不符）
+    └── 07-garment-source-and-prop-discipline.md 服装依据＝平铺图（上身图仅参考）+ 道具纪律
 knowledge_base/              你自己的品牌素材（模板已给，填了才叫「有品牌」）
 examples/template-schema.md  Excel 模板列位说明（自己建一张空表即可）
+docs/architecture.md         四阶段表 + 两道自动闸门（概要）
 ```
 
 ## 数据流

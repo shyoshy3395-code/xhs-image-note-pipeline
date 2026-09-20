@@ -317,19 +317,108 @@ def render_group_lines(actions: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def render_prompt(pkg: dict, slot: int) -> str:
-    """组合第 slot 组的完整生图 prompt（锁块 + 环境 + 动作 + 卖点锁词）。"""
+EN_CAM = {"正面": "Front view", "正面(俯拍)": "Front view (slightly high angle)",
+          "3-4侧": "Three-quarter view", "3-4侧(跟拍)": "Three-quarter view (tracking)",
+          "全侧": "Full side profile", "全侧(跟拍)": "Full side profile (tracking)",
+          "背面": "Back view"}
+EN_SHOT = {"全身": "full body", "七分": "three-quarter length", "半身": "half body",
+           "局部特写": "close-up detail", "局部": "close-up detail"}
+EN_GAZE = {"看镜头": "Looking at the camera", "看向画外": "Looking off-camera", "低头": "Looking down",
+           "不可见": "Not visible", "侧目看镜头": "Glancing at the camera", "仰头": "Looking up"}
+EN_CONTACT = {"无": "No physical contact", "自身": "Self-contact", "环境": "Contact with the environment",
+              "道具": "Contact with the prop", "环境(墙)": "Contact with the wall"}
+
+EN_MAP_FILE = os.path.join(SKILL, "references", "action-en-map（本仓库未收录）")
+
+
+def load_action_en_map() -> dict:
+    """读 action-en-map（本仓库未收录）：| 编号 | English name | English action description |"""
+    if not os.path.exists(EN_MAP_FILE):
+        return {}
+    out = {}
+    for line in open(EN_MAP_FILE, encoding="utf-8"):
+        m = re.match(r"^\|\s*([A-Z]\d{2})\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|", line)
+        if m:
+            out[m.group(1)] = (m.group(2), m.group(3))
+    return out
+
+
+def _en_action(a: dict) -> tuple[str, str, bool]:
+    """返回 (英文动作名, 英文动作描述, 是否命中映射表)。未命中则回落中文。"""
+    m = load_action_en_map()
+    if a.get("no") in m:
+        name, frag = m[a["no"]]
+        return name, frag, True
+    return a.get("name", ""), a.get("fragment", ""), False
+
+
+def _en_cam(v: str) -> str:
+    return EN_CAM.get(v, v)
+
+
+def _en_shot(v: str) -> str:
+    return EN_SHOT.get(v, v)
+
+
+def _en_gaze(v: str) -> str:
+    return EN_GAZE.get(v, v)
+
+
+def _en_contact(v: str) -> str:
+    v = (v or "无").replace("接触", "").strip()
+    if v in EN_CONTACT:
+        return EN_CONTACT[v]
+    for k, en in EN_CONTACT.items():
+        if v.startswith(k):
+            tail = v[len(k):].strip("()（） ")
+            return f"{en} ({tail})" if tail else en
+    return v
+
+
+EN_CONSTRAINT = ("Same person, facial features, hairstyle, body proportions, outfit and accessories as the reference. "
+                 "Keep the same setting, object placement, color palette and lighting. Natural anatomy, realistic scale "
+                 "and physical contact. Candid smartphone photography, subject in sharp focus, background clear and "
+                 "naturally detailed. No background blur, no shallow depth of field, no bokeh, no portrait-mode blur. "
+                 "Preserve realistic spatial depth without exaggeration.")
+
+
+def render_set_block(pkg: dict, slot: int) -> str:
+    """Y–AG 单元格内容：纯英文 [Set N] 六槽块（2026-09-20 规格）。"""
     a = pkg["actions"][slot - 1]
-    locks = pkg["prompts"]["locks_body"]
-    env = pkg.get("env", "")
-    garant = pkg.get("garment_lock", "{{服装锁词}}")
-    body = locks.replace("{{服装锁词}}", garant)
-    head = (f"【组{a['slot']}】{a['quota_camera']}｜{a['quota_shot'] or a['shot']}｜"
-            f"{a['no']} {a['name']}｜{a['gaze']}｜{a['contact']}接触\n"
-            f"动作：{a['fragment']}\n"
+    cam = _en_cam(a.get("quota_camera") or a.get("camera", ""))
+    shot = _en_shot(a.get("quota_shot") or a.get("shot", ""))
+    name, frag, hit = _en_action(a)
+    gaze, contact = _en_gaze(a.get("gaze", "")), _en_contact(a.get("contact", ""))
+    env = " ".join(pkg.get("env", "").split())
+    full = (f"In the same setting as the reference image: {env} "
+            f"Camera position: {cam}. Framing: {shot}. Action: {frag} "
+            f"Gaze: {gaze.lower()}. Physical contact: {contact.lower()}. {EN_CONSTRAINT}")
+    return (f"[Set {slot}]\n"
+            f"Camera Position: {cam}\n"
+            f"Framing: {shot}\n"
+            f"Action: {a.get('no', '')} {name}"
+            + ("" if hit else "（⚠️ 未收录英文映射，请在 action-en-map（本仓库未收录） 补）") + "\n"
+            f"Gaze: {gaze}\n"
+            f"Physical Contact: {contact}\n"
+            f"Full Image Prompt: {full}")
+
+
+def render_prompt(pkg: dict, slot: int) -> str:
+    """Y–AG 单元格内容（英文 Set 块）。生成用提示词请用 render_prompt_for_gen()。"""
+    return render_set_block(pkg, slot)
+
+
+def render_prompt_for_gen(pkg: dict, slot: int) -> str:
+    """实际送模型的提示词 = 中文锁块（人脸/服装/解剖/禁虚化） + 英文环境 + 英文动作槽位。"""
+    a = pkg["actions"][slot - 1]
+    locks = pkg["prompts"]["locks_body"].replace("{{服装锁词}}", pkg.get("garment_lock", ""))
+    head = (f"[Set {a['slot']}]\nCamera Position: {_en_cam(a.get('quota_camera') or a.get('camera',''))}\n"
+            f"Framing: {_en_shot(a.get('quota_shot') or a.get('shot',''))}\n"
+            f"Action: {a.get('no','')} {_en_action(a)[0]} — {_en_action(a)[1]}\n"
+            f"Gaze: {_en_gaze(a.get('gaze',''))}\nPhysical Contact: {_en_contact(a.get('contact',''))}\n"
             "在同一空间内，仅改变机位、景别、人物动作、视线与接触关系；空间结构、家具、门窗、地面、"
             "陈设道具位置、色调、服装与配饰全部不变。\n")
-    return f"{head}{env}\n{body}"
+    return f"{head}{pkg.get('env','')}\n{locks}\n{EN_CONSTRAINT}"
 
 
 # ── 4. CLI ─────────────────────────────────────────────────────
