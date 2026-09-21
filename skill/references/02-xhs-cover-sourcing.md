@@ -42,6 +42,17 @@ export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890   # �
 ~/.local/bin/opencli xiaohongshu search "howto穿搭" -f json --limit 15 > /tmp/b.json
 ```
 返回字段：`rank / author / likes / title / url / published_at`（**无封面直链**，需逐条下载）。
+⚠️ **也没有 `note_id` 字段**（2026-09-21 实测）—— 编号只能从 `url` 里正则抠：
+
+```python
+m = re.search(r"/(?:explore|search_result)/([0-9a-f]{16,})", url)   # url 字段里已带 xsec_token
+nid = (m.group(1) if m else (it.get("note_id") or it.get("id") or "")).strip()
+```
+
+**症状与判读**：脚本若只读 `note_id`/`id` 字段 → 候选数恒为 **0**，日志只印「候选: 0 / 完成 0/0」，
+**看着像代理或登录问题，其实是解析漏字段**（同一条搜索手动跑明明有 20 条）。
+→ 处方：脚本**第一行就打印 `候选: N`**；N=0 先查字段名与正则，别去折腾代理 —— 顺手把 `published_at`
+一起收进候选表（筛选「近期发布」要用，见 §三）。
 
 ### ★ 双通道纪律：浏览走代理，媒体下载**必须去掉代理**
 

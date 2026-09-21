@@ -9,10 +9,21 @@
 
 | 阶段 | 产出 |
 |---|---|
-| 0 抓封面 | 从 #ootdinspo / #howto穿搭 拉真实笔记封面，按 5 条合格 + 5 条红线筛选，3:4 裁切 |
-| 1 反推 | 看图写出**只含环境与拍摄**的英文提示词（人脸/服装一律剥离） |
-| 2 出图 | 首图（环境+人脸+上身+平铺 多图参考）→ 9 组动作变体（配额自动校验） |
+| 0 抓封面 | 从 #ootdinspo / #howto穿搭 / #flowfit 拉真实笔记封面，按合格标准 + 红线筛选，3:4 裁切 → **内嵌 O 列** |
+| 1 反推 | 看图写出**只含环境与拍摄**的英文提示词（人脸/服装一律剥离；六段标签全英文） |
+| 2 出图 | 首图（8 张参考图：封面 + 人脸 + R/S 上身 + T/U/V/W 平铺）→ 9 组动作变体（配额自动校验） |
 | 3 文案 + 回填 | 标题/正文/话题，连同成图**内嵌**进 xlsx 单元格（保住 WPS DISPIMG 参考图） |
+
+> **规格口径（2026-09-20 / 09-21，客户最新版）**
+> - **P 列与 Y–AG 列全部英文**：P 列固定六段 `[Scene] [Lighting] [Camera & Composition] [Color & Texture] [Reusable Keywords] [Accessories]`；
+>   Y–AG 每组为 `[Set N]` + `Camera Position / Framing / Action / Gaze / Physical Contact / Full Image Prompt`。
+> - **禁用背景虚化**：[Color & Texture] 段与原图提示词须逐字包含
+>   `No background blur, no shallow depth of field, no bokeh, and no portrait-mode blur.`（脚本附带的锁块已内置该句）
+> - **参考图列 = O 列**（`O2/O3/O4…`），服装主源 = **R（正面）/ S（背面）上身效果图**，
+>   T/U/V/W 平铺图只在细节看不清时补充（生成时 8 张参考图一起喂：`--cover --face --up1 R --up2 S --flat T --flat2 U --flat3 V --flat4 W`）。
+> - **九组配额档 `9s`**：正面全身 ≥1 + 3/4 侧 ≥1 + 全侧 ≥1 + 七分 ≥1 + 半身 ≥1 + **服装特写 ≥1**（特写槽用库内 `D03 领口/D08 面料` 等服装类条目，不要选成腕表/戒指配件特写）；
+>   另有 `std`（严格版）与 `relaxed`/`9r`（正面 = 1 全身 + 1 七分）两档，用 `--quota` 切换。
+> - 图片统一 3:4、2K（建议 1536×2048），必须**内嵌单元格**。
 
 ## 5 分钟跑起来
 
@@ -33,7 +44,10 @@ python3 skill/scripts/pipeline_loader.py --row 2 --item "示例单品" --groups 
 
 # 3) 先干跑校对提示词（不花钱），再去掉 --dry 真出图
 python3 skill/scripts/run_image_note.py --pkg /tmp/pkg.json --row 2 \
-    --outdir ./out/row2 --cover cover.jpg --face face.png --up1 up1.jpg --up2 up2.jpg --flat flat.jpg --dry
+    --outdir ./out/row2 --dry \
+    --cover cover.jpg --face face.png \
+    --up1 R正面.jpg --up2 S背面.jpg \
+    --flat T上衣正.jpg --flat2 U上衣反.jpg --flat3 V下装正.jpg --flat4 W下装反.jpg
 ```
 
 出图需要一个兼容 OpenAI 格式的生图接口。把 key 放进 `.env`：
@@ -54,9 +68,9 @@ skill/
 ├── prompts/                 ✏️ 提示词配方（改这里＝改行为，脚本实时读取、不缓存）
 │   ├── 00-README.md             怎么改 · 占位符表 · 文件↔阶段对应
 │   ├── 01-cover-filter.md       封面合格标准与红线
-│   ├── 02-reverse-reasoning.md  反推 6 段式（场景/光影/镜头/色调/关键词/搭配）+ 必须剥离清单
-│   ├── 03-locks.md              五块锁（人脸/服装/比例/质感/禁止）+ 首图机位
-│   ├── 04-nine-groups.md        9 组输出格式 + 配额矩阵
+│   ├── 02-reverse-reasoning.md  反推六段（英文标签 Scene/Lighting/Camera & Composition/Color & Texture/Reusable Keywords/Accessories）+ 必须剥离清单 + no-blur 句
+│   ├── 03-locks.md              锁块（人脸/服装/参考图分工/解剖/背景清晰·禁虚化/禁止）+ 首图机位
+│   ├── 04-nine-groups.md        9 组英文输出格式（[Set N] 六槽）+ 配额矩阵（std / 9r / 9s 三档）
 │   ├── 05-copywriting.md        文案规格 + 知识库取料顺序
 │   └── 06-space-profiles.md     空间画像（按空间批量推荐动作时读它）
 ├── scripts/
@@ -72,7 +86,8 @@ skill/
     ├── 04-locks-and-groups.md                 锁块与分布矩阵速查
     ├── 05-pipeline-orchestration.md           流水线总纲（阶段 0–3 · 命令序列 · 闸门 · 29 条已知坑）
     ├── 06-action-sampling-and-space-fit.md    动作抽条两坑（逐行重复 / 空间不符）
-    └── 07-garment-source-and-prop-discipline.md 服装依据＝平铺图（上身图仅参考）+ 道具纪律
+    ├── 07-garment-source-and-prop-discipline.md 服装依据＝**上身效果图 R/S 为主**（2026-09-21 起；平铺图仅补细节）+ 道具纪律
+    └── 08-action-library-en.md                🈯 动作库英文映射表（Y–AG 英文输出的官方词典，渲染时按编号查表）
 knowledge_base/              你自己的品牌素材（模板已给，填了才叫「有品牌」）
 examples/template-schema.md  Excel 模板列位说明（自己建一张空表即可）
 docs/architecture.md         四阶段表 + 两道自动闸门（概要）
