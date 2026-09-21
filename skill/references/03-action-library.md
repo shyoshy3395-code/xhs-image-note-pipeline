@@ -55,7 +55,15 @@
 | 列 | 给谁看 | 用途 |
 |---|---|---|
 | **提示词片段** | 人 | 配组、查重、写文案、评审时读的完整动作描述（含风险语境） |
-| **动作提示词（机位·远近·动作）** | 模型 | **三段式**可直接粘：`机位：… ｜ 远近：… ｜ 动作：…` |
+| **动作提示词（机位·远近·动作）** | 模型 | **三段式**可直接粘：`机位：… ｜ 远近：… ｜ 动作：…`（中文） |
+| **Action name (EN)** | 模型 | 英文动作名（Y–AG 是**全英文**输出，见 `prompts/04-nine-groups.md`） |
+| **Clip (EN)** | 人/模型 | 英文动作描述（同 `action-en-map（本仓库未收录）`，跨族速查用） |
+| **Action prompt (EN) (camera · framing · action)** | 模型 | **英文三段式**：`Camera: Front view · eye level ｜ Framing: full body ｜ Action: …` |
+
+> ⚠️ **段间分隔符必须用全角 `｜`**。半角 `|` 会被 Markdown 当列边界，把一行拆成多列
+> （2026-09-21 踩过：135 行全部多出 2 列，`verify_export.py` 已加 ⑥b 断言兜底）。
+> 英文三列由 `scripts/fill_action_prompts_en.py` 生成（数据源：`action-en-map（本仓库未收录）` +
+> `pipeline_loader.py` 的 `EN_CAM` / `EN_SHOT` 词典），与中文列工具 `fill_action_prompts.py` 分工不重叠。
 
 **「动作提示词」列只写三件事**：① 拍摄角度机位　② 拍摄远近（景别）　③ 人体动作。
 
@@ -89,161 +97,161 @@ python3 scripts/pipeline_loader.py --list-families             # ② 确认权�
 
 ### W · 行走与移动（12）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| W01 | 正面走向镜头 | 人物正面朝镜头自然迈步走近，重心前移，双臂自然摆动，视线越过镜头看向远处 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：人物正面朝镜头自然迈步走近，重心前移，双臂自然摆动，视线越过镜头看向远处 |
-| W02 | 迈步停顿瞬间 | 迈步后前脚刚踏实、后脚准备跟上的停顿瞬间，身体仍有轻微惯性前倾 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：迈步后前脚刚踏实、后脚准备跟上的停顿瞬间，身体仍有轻微惯性前倾 |
-| W03 | 侧身跟拍行走中 | 迈步中段，前腿承重、后脚跟刚离地，衣摆与裤脚带出轻微动态褶皱 | 全侧(跟拍) | 全身 | 无 | ✅ | 机位：全侧·跟拍 ｜ 远近：全身 ｜ 动作：迈步中段，前腿承重、后脚跟刚离地，双臂自然摆动，下摆与裤脚被带出轻微动态 |
-| W04 | 走两步后回身换向 | 走两步后回身换了方向，身体扭转但脚步未停 | 全侧 | 全身 | 无 | ⚠️ 衣身扭转易变形 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：走两步后回身换了方向，身体扭转但脚步未停 |
-| W05 | 背向走远 | 背对镜头沿街向前走，越走越远，背影占幅约 1/3 | 背面 | 全身 | 无 | ✅ 一致性压力最小 | 机位：背面·平视 ｜ 远近：全身 ｜ 动作：背对镜头沿街向前走，越走越远，背影在画面里占幅约 1/3 |
-| W06 | 过肩跟拍行走 | 相机在人物右后方过肩，可见肩线与前方街区纵深，后脑与右肩入画 | 背面(过肩) | 半身 | 无 | ✅ | 机位：背面·过肩 ｜ 远近：半身 ｜ 动作：相机在人物右后方过肩，画面可见肩线与前方街区纵深，后脑与右肩入画 |
-| W07 | 上半步台阶 | 一只脚踏上台阶、另一脚在后，手自然垂落 | 3-4侧 | 全身 | 环境(台阶) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一只脚踏上台阶、另一脚在后，手自然垂落 |
-| W08 | 下台阶低头看路 | 下台阶瞬间低头看脚下，一手略抬保持平衡 | 3-4侧 | 全身 | 环境 | ⚠️ 手部易畸变 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：下台阶瞬间低头看脚下，一手略抬保持平衡 |
-| W09 | 侧身沿扶手前行 | 侧身沿扶手向前，掌心搭在扶手上 | 全侧 | 全身 | 环境(扶手) | ⚠️ 手与扶手接触点易糊 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：侧身沿扶手向前，掌心搭在扶手上 |
-| W10 | 横过路口走到中段 | 人物在斑马线上走到中段，身影较小，环境占主体 | 正面 | 全景空镜带人 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全景空镜带人 ｜ 动作：人物在斑马线上走到中段，身影较小，环境占主体 |
-| W11 | 停步等信号灯 | 站在路口边缘等灯，双脚自然分开，视线看向前方车流 | 3-4侧 | 七分 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：站在路口边缘等灯，双脚自然分开，视线看向前方车流 |
-| W12 | 拎袋快步走 | 一手拎袋，步幅略大，带一点赶时间的速度感 | 3-4侧 | 全身 | 道具 | ⚠️ 袋与手接触点 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一手拎袋，步幅略大，带一点赶时间的速度感 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| W01 | 正面走向镜头 | 人物正面朝镜头自然迈步走近，重心前移，双臂自然摆动，视线越过镜头看向远处 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：人物正面朝镜头自然迈步走近，重心前移，双臂自然摆动，视线越过镜头看向远处 | Walking straight toward the camera | Walking naturally straight toward the camera, weight forward, arms swinging, gaze passing over the lens into the distance | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Walking naturally straight toward the camera, weight forward, arms swinging, gaze passing over the lens into the distance |
+| W02 | 迈步停顿瞬间 | 迈步后前脚刚踏实、后脚准备跟上的停顿瞬间，身体仍有轻微惯性前倾 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：迈步后前脚刚踏实、后脚准备跟上的停顿瞬间，身体仍有轻微惯性前倾 | The pause after a step | Just planted the front foot with the back foot about to follow, the body still carrying a slight forward lean | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Just planted the front foot with the back foot about to follow, the body still carrying a slight forward lean |
+| W03 | 侧身跟拍行走中 | 迈步中段，前腿承重、后脚跟刚离地，衣摆与裤脚带出轻微动态褶皱 | 全侧(跟拍) | 全身 | 无 | ✅ | 机位：全侧·跟拍 ｜ 远近：全身 ｜ 动作：迈步中段，前腿承重、后脚跟刚离地，双臂自然摆动，下摆与裤脚被带出轻微动态 | Walking in profile, tracking shot | Mid-stride in profile, front leg bearing weight, rear heel just lifting, hem and trouser cuff carrying slight motion folds | Camera: Full side profile · tracking ｜ Framing: full body ｜ Action: Mid-stride in profile, front leg bearing weight, rear heel just lifting, hem and trouser cuff carrying slight motion folds |
+| W04 | 走两步后回身换向 | 走两步后回身换了方向，身体扭转但脚步未停 | 全侧 | 全身 | 无 | ⚠️ 衣身扭转易变形 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：走两步后回身换了方向，身体扭转但脚步未停 | Two steps then turning back | Two steps in, turning back to change direction, the body twisting while the feet keep moving | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Two steps in, turning back to change direction, the body twisting while the feet keep moving |
+| W05 | 背向走远 | 背对镜头沿街向前走，越走越远，背影占幅约 1/3 | 背面 | 全身 | 无 | ✅ 一致性压力最小 | 机位：背面·平视 ｜ 远近：全身 ｜ 动作：背对镜头沿街向前走，越走越远，背影在画面里占幅约 1/3 | Walking away, back to camera | Walking away from the camera along the street, growing smaller, the back view filling about one third of the frame | Camera: Back view · eye level ｜ Framing: full body ｜ Action: Walking away from the camera along the street, growing smaller, the back view filling about one third of the frame |
+| W06 | 过肩跟拍行走 | 相机在人物右后方过肩，可见肩线与前方街区纵深，后脑与右肩入画 | 背面(过肩) | 半身 | 无 | ✅ | 机位：背面·过肩 ｜ 远近：半身 ｜ 动作：相机在人物右后方过肩，画面可见肩线与前方街区纵深，后脑与右肩入画 | Over-the-shoulder tracking | Camera behind and slightly to the right of the subject, shoulder line and street depth visible, the back of the head and right shoulder in frame | Camera: Back view · over the shoulder ｜ Framing: half body ｜ Action: Camera behind and slightly to the right of the subject, shoulder line and street depth visible, the back of the head and right shoulder in frame |
+| W07 | 上半步台阶 | 一只脚踏上台阶、另一脚在后，手自然垂落 | 3-4侧 | 全身 | 环境(台阶) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一只脚踏上台阶、另一脚在后，手自然垂落 | Stepping up onto a step | One foot stepping up onto a step with the other behind, arms hanging naturally | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: One foot stepping up onto a step with the other behind, arms hanging naturally |
+| W08 | 下台阶低头看路 | 下台阶瞬间低头看脚下，一手略抬保持平衡 | 3-4侧 | 全身 | 环境 | ⚠️ 手部易畸变 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：下台阶瞬间低头看脚下，一手略抬保持平衡 | Stepping down, watching the ground | Mid-step down, head down watching the feet, one hand slightly raised for balance | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Mid-step down, head down watching the feet, one hand slightly raised for balance |
+| W09 | 侧身沿扶手前行 | 侧身沿扶手向前，掌心搭在扶手上 | 全侧 | 全身 | 环境(扶手) | ⚠️ 手与扶手接触点易糊 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：侧身沿扶手向前，掌心搭在扶手上 | Moving along a handrail in profile | Moving forward in profile along a handrail, palm resting on the rail | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Moving forward in profile along a handrail, palm resting on the rail |
+| W10 | 横过路口走到中段 | 人物在斑马线上走到中段，身影较小，环境占主体 | 正面 | 全景空镜带人 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全景空镜带人 ｜ 动作：人物在斑马线上走到中段，身影较小，环境占主体 | Crossing the road, mid-way | Walking in the middle of a zebra crossing, the figure small in frame with the environment dominating | Camera: Front view · eye level ｜ Framing: 全景空镜带人 ｜ Action: Walking in the middle of a zebra crossing, the figure small in frame with the environment dominating |
+| W11 | 停步等信号灯 | 站在路口边缘等灯，双脚自然分开，视线看向前方车流 | 3-4侧 | 七分 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：站在路口边缘等灯，双脚自然分开，视线看向前方车流 | Waiting at a traffic light | Standing at the edge of a junction waiting for the light, feet apart, gaze toward the traffic ahead | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Standing at the edge of a junction waiting for the light, feet apart, gaze toward the traffic ahead |
+| W12 | 拎袋快步走 | 一手拎袋，步幅略大，带一点赶时间的速度感 | 3-4侧 | 全身 | 道具 | ⚠️ 袋与手接触点 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一手拎袋，步幅略大，带一点赶时间的速度感 | Walking briskly with a bag | Carrying a bag in one hand, slightly longer stride, a hint of hurry | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Carrying a bag in one hand, slightly longer stride, a hint of hurry |
 
 ### S · 站立与姿态（18）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| S01 | 正面站立双手垂落 | 自然站立，重心略偏一侧，双手自然垂在体侧 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：自然站立，重心略偏一侧，双手自然垂在体侧 |
-| S02 | 一手插兜 | 一只手自然插进外套口袋，另一手垂落 | 正面 | 七分 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：一只手自然插进口袋，另一手垂落 |
-| S03 | 重心单腿站姿 | 重心落在靠近镜头的腿，另一条腿膝盖微松，肩线自然下沉 | 全侧 | 全身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：重心落在靠近镜头的腿，另一条腿膝盖微松，肩线自然下沉 |
-| S04 | 肩背轻靠墙面 | 肩背轻靠墙面，双手自然搭在身前，脚距与肩同宽 | 3-4侧 | 七分 | 环境(墙) | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：肩背轻靠墙面，双手自然搭在身前，脚距与肩同宽 |
-| S05 | 靠栏杆侧身远望 | 手肘搭在栏杆上，侧身看向远处 | 3-4侧 | 七分 | 环境(栏杆) | ⚠️ 手肘接触点 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：手肘搭在栏杆上，侧身看向远处 |
-| S06 | 靠柱交叉双腿 | 背靠柱子站立，双腿自然交叉，双手交握在身前 | 3-4侧 | 全身 | 环境(柱) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：背靠柱子站立，双腿自然交叉，双手交握在身前 |
-| S07 | 双手抱臂侧身 | 双手自然抱臂，侧身看向画外，肩背放松不耸肩 | 全侧 | 七分 | 自身 | ⚠️ 抱臂易压变形衣袖 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：双手自然抱臂，侧身看向画外，肩背放松不耸肩 |
-| S08 | 双手插兜微收下巴 | 双手插兜，下巴微收，视线平稳 | 正面 | 半身 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：双手插兜，下巴微收，视线平稳 |
-| S09 | 掌心贴后腰侧 | 一只手自然贴在后腰侧（不是模特叉腰），肘部微曲 | 3-4侧 | 七分 | 自身 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：一只手自然贴在后腰侧、肘部微曲，不做叉腰手势 |
-| S10 | 背对镜头抬头看建筑 | 背对镜头微微仰头看建筑上部，双手自然垂落 | 背面 | 全身 | 无 | ✅ | 机位：背面·平视 ｜ 远近：全身 ｜ 动作：背对镜头微微仰头看建筑上部，双手自然垂落 |
-| S11 | 侧身回望画外 | 身体朝前，头部转向画外某点，肩膀未跟着转 | 全侧 | 半身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：半身 ｜ 动作：身体朝前，头部转向画外某点，肩膀未跟着转 |
-| S12 | 前倾看橱窗 | 微微前倾贴近玻璃看店内，重心前移，双脚未移动 | 3-4侧 | 七分 | 环境(玻璃) | ⚠️ 玻璃倒影易乱 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：微微前倾贴近玻璃看店内，重心前移，双脚未移动 |
-| S13 | 歪头听人说话 | 头部轻歪，像在听画外人说话，眼神放松 | 正面 | 半身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：头部轻歪，像在听画外人说话，眼神放松 |
-| S14 | 低头整理胸前衣襟 | 低头用手捋顺前襟，指尖捏住面料 | 正面 | 半身 | 自身 | ⚠️ 手部+配饰 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：低头用手捋顺前襟，指尖轻捏衣襟边缘 |
-| S15 | 单手扶帽檐 | 一只手轻抬扶帽檐，头微低 | 3-4侧 | 半身 | 自身(帽) | ⚠️ 帽子轮廓易变 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：一只手轻抬扶住帽檐，头微低 |
-| S16 | 抬手挡阳光 | 手掌虚挡在额前，眯眼看向远处 | 正面 | 半身 | 自身 | ⚠️ 面部遮挡改五官 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：手掌虚挡在额前，眯眼看向远处 |
-| S17 | 背对镜头静立 | 背对镜头自然站立，双手自然垂落，背脊放松，双脚与肩同宽 | 背面 | 全身 | 无 | ✅ | 机位：背面·平视 ｜ 远近：全身 ｜ 动作：背对镜头自然站立，双手自然垂落，背脊放松，双脚与肩同宽 |
-| S18 | 正面七分·一手轻扶腰侧 | 一只手轻扶在腰侧，另一手自然垂落，重心稳定，肩线放松 | 正面 | 七分 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：一只手轻扶在腰侧，另一手自然垂落，重心稳定，肩线放松 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| S01 | 正面站立双手垂落 | 自然站立，重心略偏一侧，双手自然垂在体侧 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：自然站立，重心略偏一侧，双手自然垂在体侧 | Standing with arms relaxed | Standing naturally, weight slightly to one side, arms hanging relaxed at the sides | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Standing naturally, weight slightly to one side, arms hanging relaxed at the sides |
+| S02 | 一手插兜 | 一只手自然插进外套口袋，另一手垂落 | 正面 | 七分 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：一只手自然插进口袋，另一手垂落 | One hand in pocket | One hand resting naturally in a pocket, the other arm hanging down | Camera: Front view · eye level ｜ Framing: three-quarter length ｜ Action: One hand resting naturally in a pocket, the other arm hanging down |
+| S03 | 重心单腿站姿 | 重心落在靠近镜头的腿，另一条腿膝盖微松，肩线自然下沉 | 全侧 | 全身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：重心落在靠近镜头的腿，另一条腿膝盖微松，肩线自然下沉 | Weight-shift single-leg stance | Weight on the leg nearest the camera, the other knee soft, shoulders relaxed and level | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Weight on the leg nearest the camera, the other knee soft, shoulders relaxed and level |
+| S04 | 肩背轻靠墙面 | 肩背轻靠墙面，双手自然搭在身前，脚距与肩同宽 | 3-4侧 | 七分 | 环境(墙) | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：肩背轻靠墙面，双手自然搭在身前，脚距与肩同宽 | Shoulder resting against the wall | Shoulders and upper back resting lightly against the wall, hands loosely together in front, feet shoulder-width apart | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Shoulders and upper back resting lightly against the wall, hands loosely together in front, feet shoulder-width apart |
+| S05 | 靠栏杆侧身远望 | 手肘搭在栏杆上，侧身看向远处 | 3-4侧 | 七分 | 环境(栏杆) | ⚠️ 手肘接触点 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：手肘搭在栏杆上，侧身看向远处 | Leaning on a railing, looking out | Elbow resting on a railing, body in profile, looking into the distance | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Elbow resting on a railing, body in profile, looking into the distance |
+| S06 | 靠柱交叉双腿 | 背靠柱子站立，双腿自然交叉，双手交握在身前 | 3-4侧 | 全身 | 环境(柱) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：背靠柱子站立，双腿自然交叉，双手交握在身前 | Leaning on a pillar, legs crossed | Standing with the back against a pillar, legs crossed naturally, hands clasped in front | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Standing with the back against a pillar, legs crossed naturally, hands clasped in front |
+| S07 | 双手抱臂侧身 | 双手自然抱臂，侧身看向画外，肩背放松不耸肩 | 全侧 | 七分 | 自身 | ⚠️ 抱臂易压变形衣袖 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：双手自然抱臂，侧身看向画外，肩背放松不耸肩 | Arms folded, in profile | Arms folded naturally, body in profile looking off-camera, shoulders relaxed and not hunched | Camera: Full side profile · eye level ｜ Framing: three-quarter length ｜ Action: Arms folded naturally, body in profile looking off-camera, shoulders relaxed and not hunched |
+| S08 | 双手插兜微收下巴 | 双手插兜，下巴微收，视线平稳 | 正面 | 半身 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：双手插兜，下巴微收，视线平稳 | Both hands in pockets, chin tucked | Both hands in pockets, chin tucked slightly, steady gaze | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Both hands in pockets, chin tucked slightly, steady gaze |
+| S09 | 掌心贴后腰侧 | 一只手自然贴在后腰侧（不是模特叉腰），肘部微曲 | 3-4侧 | 七分 | 自身 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：一只手自然贴在后腰侧、肘部微曲，不做叉腰手势 | Palm resting on lower back | One hand resting naturally at the lower back, elbow slightly bent | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: One hand resting naturally at the lower back, elbow slightly bent |
+| S10 | 背对镜头抬头看建筑 | 背对镜头微微仰头看建筑上部，双手自然垂落 | 背面 | 全身 | 无 | ✅ | 机位：背面·平视 ｜ 远近：全身 ｜ 动作：背对镜头微微仰头看建筑上部，双手自然垂落 | Looking up, back to camera | Back to the camera, chin slightly raised as if looking up, both arms hanging naturally | Camera: Back view · eye level ｜ Framing: full body ｜ Action: Back to the camera, chin slightly raised as if looking up, both arms hanging naturally |
+| S11 | 侧身回望画外 | 身体朝前，头部转向画外某点，肩膀未跟着转 | 全侧 | 半身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：半身 ｜ 动作：身体朝前，头部转向画外某点，肩膀未跟着转 | Looking back off-camera | Body facing forward, head turned toward a point off-camera, shoulders not following the turn | Camera: Full side profile · eye level ｜ Framing: half body ｜ Action: Body facing forward, head turned toward a point off-camera, shoulders not following the turn |
+| S12 | 前倾看橱窗 | 微微前倾贴近玻璃看店内，重心前移，双脚未移动 | 3-4侧 | 七分 | 环境(玻璃) | ⚠️ 玻璃倒影易乱 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：微微前倾贴近玻璃看店内，重心前移，双脚未移动 | Leaning toward a shop window | Leaning slightly toward the glass to look inside, weight forward, feet not moving | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Leaning slightly toward the glass to look inside, weight forward, feet not moving |
+| S13 | 歪头听人说话 | 头部轻歪，像在听画外人说话，眼神放松 | 正面 | 半身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：头部轻歪，像在听画外人说话，眼神放松 | Head tilted, listening | Head tilted slightly as if listening to someone off-camera, relaxed eyes | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Head tilted slightly as if listening to someone off-camera, relaxed eyes |
+| S14 | 低头整理胸前衣襟 | 低头用手捋顺前襟，指尖捏住面料 | 正面 | 半身 | 自身 | ⚠️ 手部+配饰 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：低头用手捋顺前襟，指尖轻捏衣襟边缘 | Smoothing the front placket | Head down smoothing the front placket with the fingertips pinching the fabric | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Head down smoothing the front placket with the fingertips pinching the fabric |
+| S15 | 单手扶帽檐 | 一只手轻抬扶帽檐，头微低 | 3-4侧 | 半身 | 自身(帽) | ⚠️ 帽子轮廓易变 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：一只手轻抬扶住帽檐，头微低 | One hand at a hat brim | One hand lifting lightly to a hat brim, head slightly down | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: One hand lifting lightly to a hat brim, head slightly down |
+| S16 | 抬手挡阳光 | 手掌虚挡在额前，眯眼看向远处 | 正面 | 半身 | 自身 | ⚠️ 面部遮挡改五官 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：手掌虚挡在额前，眯眼看向远处 | Hand raised against the light | Palm held loosely in front of the forehead, eyes narrowed looking into the distance | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Palm held loosely in front of the forehead, eyes narrowed looking into the distance |
+| S17 | 背对镜头静立 | 背对镜头自然站立，双手自然垂落，背脊放松，双脚与肩同宽 | 背面 | 全身 | 无 | ✅ | 机位：背面·平视 ｜ 远近：全身 ｜ 动作：背对镜头自然站立，双手自然垂落，背脊放松，双脚与肩同宽 | Standing still, back to camera | Standing with the back to the camera, arms hanging naturally, back relaxed, feet shoulder-width apart | Camera: Back view · eye level ｜ Framing: full body ｜ Action: Standing with the back to the camera, arms hanging naturally, back relaxed, feet shoulder-width apart |
+| S18 | 正面七分·一手轻扶腰侧 | 一只手轻扶在腰侧，另一手自然垂落，重心稳定，肩线放松 | 正面 | 七分 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：一只手轻扶在腰侧，另一手自然垂落，重心稳定，肩线放松 | Front three-quarter, hand at the waist | One hand resting lightly at the waist, the other arm hanging naturally, steady weight, shoulders relaxed | Camera: Front view · eye level ｜ Framing: three-quarter length ｜ Action: One hand resting lightly at the waist, the other arm hanging naturally, steady weight, shoulders relaxed |
 
 ### T · 坐姿（8）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| T01 | 台阶坐姿手撑膝 | 坐在台阶上，双手撑在膝盖上，上身略前倾 | 3-4侧 | 全身 | 环境(台阶) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：坐在台阶上，双手撑在膝盖上，上身略前倾 |
-| T02 | 长椅侧身坐 | 坐在长椅上侧身朝向画外，一条腿收在身前 | 3-4侧 | 全身 | 环境(长椅) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：坐在长椅上侧身朝向画外，一条腿收在身前 |
-| T03 | 交叠双腿看画外 | 双腿自然交叠，双手交握放在腿上，视线看向画外 | 全侧 | 全身 | 环境 | ⚠️ 腿部交叠易畸变 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：双腿自然交叠，双手交握放在腿上，视线看向画外 |
-| T04 | 矮墙坐姿一腿悬空 | 坐在矮墙上，一条腿垂落、另一条腿脚掌踩在墙沿 | 全侧 | 全身 | 环境 | ⚠️ 腿长比例 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：坐在矮墙上，一条腿垂落、另一条腿脚掌踩在墙沿 |
-| T05 | 窗台侧坐朝窗外 | 侧坐在窗台，身体朝向窗外，手搭在膝上 | 全侧 | 七分 | 环境(窗台) | ✅ | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：侧坐在窗台，身体朝向窗外，手搭在膝上 |
-| T06 | 窗边坐一手搭杯 | 坐在窗边，一只手轻搭杯壁，视线看向窗外 | 3-4侧 | 七分 | 道具 | ⚠️ 配饰+手部 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：坐在窗边，一只手轻搭杯壁，视线看向窗外 |
-| T07 | 盘腿坐整理鞋袜 | 盘腿坐在地上，低头整理鞋口 | 3-4侧 | 全身 | 环境(地面)+自身 | ⚠️ 鞋型与跟高 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：盘腿坐在地上，低头整理鞋口 |
-| T08 | 手肘支膝托腮 | 手肘支在膝盖上，手掌虚托下颌，看向画外 | 全侧 | 全身 | 自身 | ⚠️ 手遮下颌线 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：手肘支在膝盖上，手掌虚托下颌，看向画外 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| T01 | 台阶坐姿手撑膝 | 坐在台阶上，双手撑在膝盖上，上身略前倾 | 3-4侧 | 全身 | 环境(台阶) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：坐在台阶上，双手撑在膝盖上，上身略前倾 | Sitting on a step, hands on knees | Sitting on a step with both hands on the knees, upper body leaning slightly forward | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Sitting on a step with both hands on the knees, upper body leaning slightly forward |
+| T02 | 长椅侧身坐 | 坐在长椅上侧身朝向画外，一条腿收在身前 | 3-4侧 | 全身 | 环境(长椅) | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：坐在长椅上侧身朝向画外，一条腿收在身前 | Sitting side-on on a bench | Sitting on a bench turned side-on toward something off-camera, one leg drawn up in front | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Sitting on a bench turned side-on toward something off-camera, one leg drawn up in front |
+| T03 | 交叠双腿看画外 | 双腿自然交叠，双手交握放在腿上，视线看向画外 | 全侧 | 全身 | 环境 | ⚠️ 腿部交叠易畸变 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：双腿自然交叠，双手交握放在腿上，视线看向画外 | Seated, legs crossed, looking away | Legs crossed naturally, hands clasped on the lap, gaze toward something off-camera | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Legs crossed naturally, hands clasped on the lap, gaze toward something off-camera |
+| T04 | 矮墙坐姿一腿悬空 | 坐在矮墙上，一条腿垂落、另一条腿脚掌踩在墙沿 | 全侧 | 全身 | 环境 | ⚠️ 腿长比例 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：坐在矮墙上，一条腿垂落、另一条腿脚掌踩在墙沿 | Sitting on a low wall, one leg hanging | Sitting on a low wall, one leg hanging down, the other foot resting on the wall edge | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Sitting on a low wall, one leg hanging down, the other foot resting on the wall edge |
+| T05 | 窗台侧坐朝窗外 | 侧坐在窗台，身体朝向窗外，手搭在膝上 | 全侧 | 七分 | 环境(窗台) | ✅ | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：侧坐在窗台，身体朝向窗外，手搭在膝上 | Sitting at a windowsill, facing out | Sitting at a windowsill facing outward, one hand resting on the ledge | Camera: Full side profile · eye level ｜ Framing: three-quarter length ｜ Action: Sitting at a windowsill facing outward, one hand resting on the ledge |
+| T06 | 窗边坐一手搭杯 | 坐在窗边，一只手轻搭杯壁，视线看向窗外 | 3-4侧 | 七分 | 道具 | ⚠️ 配饰+手部 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：坐在窗边，一只手轻搭杯壁，视线看向窗外 | Sitting by the window, hand on a cup | Sitting by the window, one hand resting lightly on a cup, gaze out of the window | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Sitting by the window, one hand resting lightly on a cup, gaze out of the window |
+| T07 | 盘腿坐整理鞋袜 | 盘腿坐在地上，低头整理鞋口 | 3-4侧 | 全身 | 环境(地面)+自身 | ⚠️ 鞋型与跟高 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：盘腿坐在地上，低头整理鞋口 | Cross-legged, adjusting footwear | Sitting cross-legged on the ground, head down adjusting the opening of a shoe | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Sitting cross-legged on the ground, head down adjusting the opening of a shoe |
+| T08 | 手肘支膝托腮 | 手肘支在膝盖上，手掌虚托下颌，看向画外 | 全侧 | 全身 | 自身 | ⚠️ 手遮下颌线 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：手肘支在膝盖上，手掌虚托下颌，看向画外 | Elbow on knee, chin propped | Elbow resting on the knee, palm loosely propping the chin, looking off-camera | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Elbow resting on the knee, palm loosely propping the chin, looking off-camera |
 
 ### C · 蹲与低姿（7）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| C01 | 蹲下系鞋带 | 单腿蹲下低头系鞋带，手指捏住鞋带 | 3-4侧 | 七分 | 自身+鞋 | ⚠️ 手部高危 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：单腿蹲下低头系鞋带，手指捏住鞋带 |
-| C02 | 蹲下与门口小猫互动 | 蹲下伸出手掌靠近脚边的小猫，身体重心后坐，脸朝猫 | 3-4侧 | 全身 | 道具(猫) | ⚠️⚠️ 配饰最易增删 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：蹲下伸出手掌靠近脚边的小猫，身体重心后坐，脸朝猫 |
-| C03 | 弯腰捡东西 | 弯下腰去拾地面上的物件，一只手已伸出 | 全侧 | 七分 | 自身 | ⚠️ 腰线-下摆易走形 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：弯下腰去拾地面上的物件，一只手已伸出 |
-| C04 | 弯腰看货架 | 微微弯腰看低层货架上的东西，双手自然下垂 | 3-4侧 | 七分 | 环境 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：微微弯腰看低层货架上的东西，双手自然下垂 |
-| C05 | 单膝跪整理包内 | 单膝跪地，低头翻看放在地上的包内物品 | 3-4侧 | 全身 | 道具+环境 | ⚠️⚠️ 包型与配饰 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：单膝跪地，低头翻看放在地上的包内物品 |
-| C06 | 蹲姿平视宠物高度 | 蹲低到与宠物视线齐平，双手搭在膝盖上 | 全侧 | 全身 | 环境 | ✅ | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：蹲低到与宠物视线齐平，双手搭在膝盖上 |
-| C07 | 弯腰拉裤脚 | 弯腰把裤脚拉平，指尖捏住下摆边缘 | 3-4侧 | 七分 | 自身 | ⚠️⚠️ 下摆不得开衩 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：弯腰把裤脚拉平，指尖捏住脚踝处的边缘 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| C01 | 蹲下系鞋带 | 单腿蹲下低头系鞋带，手指捏住鞋带 | 3-4侧 | 七分 | 自身+鞋 | ⚠️ 手部高危 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：单腿蹲下低头系鞋带，手指捏住鞋带 | Crouching to tie a shoelace | Crouching on one leg, head down, fingers pinching a shoelace | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Crouching on one leg, head down, fingers pinching a shoelace |
+| C02 | 蹲下与门口小猫互动 | 蹲下伸出手掌靠近脚边的小猫，身体重心后坐，脸朝猫 | 3-4侧 | 全身 | 道具(猫) | ⚠️⚠️ 配饰最易增删 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：蹲下伸出手掌靠近脚边的小猫，身体重心后坐，脸朝猫 | Crouching to greet a small animal | Crouching low with one hand extended toward a small animal at foot level, weight settled back | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Crouching low with one hand extended toward a small animal at foot level, weight settled back |
+| C03 | 弯腰捡东西 | 弯下腰去拾地面上的物件，一只手已伸出 | 全侧 | 七分 | 自身 | ⚠️ 腰线-下摆易走形 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：弯下腰去拾地面上的物件，一只手已伸出 | Bending down to pick something up | Bending forward to pick an object off the ground, one hand already extended | Camera: Full side profile · eye level ｜ Framing: three-quarter length ｜ Action: Bending forward to pick an object off the ground, one hand already extended |
+| C04 | 弯腰看货架 | 微微弯腰看低层货架上的东西，双手自然下垂 | 3-4侧 | 七分 | 环境 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：微微弯腰看低层货架上的东西，双手自然下垂 | Leaning to look at a low shelf | Leaning slightly to look at items on a low shelf, arms hanging naturally | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Leaning slightly to look at items on a low shelf, arms hanging naturally |
+| C05 | 单膝跪整理包内 | 单膝跪地，低头翻看放在地上的包内物品 | 3-4侧 | 全身 | 道具+环境 | ⚠️⚠️ 包型与配饰 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：单膝跪地，低头翻看放在地上的包内物品 | Kneeling to look through a bag | Kneeling on one knee, head down looking through the items in a bag on the ground | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Kneeling on one knee, head down looking through the items in a bag on the ground |
+| C06 | 蹲姿平视宠物高度 | 蹲低到与宠物视线齐平，双手搭在膝盖上 | 全侧 | 全身 | 环境 | ✅ | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：蹲低到与宠物视线齐平，双手搭在膝盖上 | Crouching to pet a small animal | Crouching low to meet a small animal at eye level, hands resting on the knees | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Crouching low to meet a small animal at eye level, hands resting on the knees |
+| C07 | 弯腰拉裤脚 | 弯腰把裤脚拉平，指尖捏住下摆边缘 | 3-4侧 | 七分 | 自身 | ⚠️⚠️ 下摆不得开衩 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：弯腰把裤脚拉平，指尖捏住脚踝处的边缘 | Bending to straighten a trouser hem | Bending to smooth a trouser cuff, fingertips pinching the hem edge | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Bending to smooth a trouser cuff, fingertips pinching the hem edge |
 
 ### H · 手部与配饰交互（17）· **配饰零增零减的验收镜头**
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| H01 | 扶包带调长度 | 一只手捏住包带轻调长度，肩部微抬 | 3-4侧 | 半身 | 道具(包) | ⚠️ 包型 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：一只手捏住包带轻调长度，肩部微抬 |
-| H02 | 包换手拎 | 包正从右手换到左手的中间态，手指刚松开又握上 | 正面 | 半身 | 道具 | ⚠️ 手指数量 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：包正从右手换到左手的中间态，手指刚松开又握上 |
-| H03 | 指尖触耳饰 | 指尖轻碰耳侧配饰，头略侧 | 正面 | 半身 | 自身 | ⚠️ 手部高危 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：指尖轻碰耳侧配饰，头略侧 |
-| H04 | 拨弄耳侧发丝 | 手指把耳侧一缕头发轻轻别向耳后 | 3-4侧 | 半身 | 自身(发) | ✅ | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：手指把耳侧一缕头发轻轻别向耳后 |
-| H05 | 拢发到耳后 | 手掌拢起一侧头发别到耳后，露出耳部与耳饰 | 全侧 | 半身 | 自身(发) | ⚠️ 发量与发长 | 机位：全侧·平视 ｜ 远近：半身 ｜ 动作：手掌拢起一侧头发别到耳后，露出耳部与耳饰 |
-| H06 | 理发尾到肩前 | 低头把发尾从背后拢到肩前 | 正面 | 半身 | 自身(发) | ⚠️ 发长 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：低头把发尾从背后拢到肩前 |
-| H07 | 看腕表时间 | 低头看腕部时间，另一手虚扶腕带 | 正面(俯拍) | 局部特写 | 自身 | ⚠️ 腕表位置 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：低头看腕部时间，另一手虚扶腕带 |
-| H08 | 整理袖口 | 手指捏住袖口往上轻推，露出腕部配饰 | 背面(过肩) | 七分 | 自身 | ⚠️ 袖长不得变 | 机位：背面·过肩 ｜ 远近：七分 ｜ 动作：手指捏住袖口往上轻推，露出腕部配饰 |
-| H09 | 拉正外套衣襟 | 两手捏住前襟向外轻拉再松手，衣服回弹 | 正面 | 半身 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：两手捏住前襟向外轻拉再松手，衣服回弹 |
-| H10 | 扣一颗纽扣 | 低头扣上/解开一颗前襟纽扣，指尖在扣位 | 3-4侧 | 半身 | 自身 | ⚠️ 纽扣数不得变 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：低头扣上/解开一颗前襟纽扣，指尖在扣位 |
-| H11 | 拉上拉链 | 一只手把拉链往上拉，另一手扶住下摆 | 正面 | 半身 | 自身 | ⚠️ 门襟形态 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：一只手把拉链往上拉，另一手扶住下摆 |
-| H12 | 抚平衣摆褶皱 | 双手把衣摆向下抚平 | 正面 | 七分 | 自身 | ⚠️⚠️ 下摆不得开衩 | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：双手把衣摆向下抚平 |
-| H13 | 口袋翻找手机 | 一只手在口袋里翻找，另一手轻扶袋口 | 3-4侧 | 七分 | 自身 | ⚠️ 袋位不得移位 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：一只手在口袋里翻找，另一手轻扶袋口 |
-| H14 | 整理项链坠子 | 低头用指尖把坠子摆正 | 正面 | 半身 | 自身 | ⚠️⚠️ 项链长度与坠型 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：低头用指尖把坠子摆正 |
-| H15 | 转动戒指 | 拇指轻转另一只手上的戒指 | 正面(俯拍) | 局部特写 | 自身 | ⚠️ 手部高危 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：拇指轻转另一只手上的戒指 |
-| H16 | 手落腰侧口袋边 | 一只手自然落在腰侧口袋边缘，未插入 | 3-4侧 | 七分 | 自身 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：一只手自然落在腰侧口袋边缘，未插入 |
-| H17 | 指尖压领带下端 | 指尖轻压领带下端使其归位，头微低看向领口 | 正面 | 半身 | 自身(领带)接触 | ✅ 实测 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：指尖轻压领带下端使其归位，头微低看向领口 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| H01 | 扶包带调长度 | 一只手捏住包带轻调长度，肩部微抬 | 3-4侧 | 半身 | 道具(包) | ⚠️ 包型 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：一只手捏住包带轻调长度，肩部微抬 | Adjusting the bag strap | One hand pinching the bag strap to adjust its length, shoulder lifted slightly | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: One hand pinching the bag strap to adjust its length, shoulder lifted slightly |
+| H02 | 包换手拎 | 包正从右手换到左手的中间态，手指刚松开又握上 | 正面 | 半身 | 道具 | ⚠️ 手指数量 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：包正从右手换到左手的中间态，手指刚松开又握上 | Switching the bag to the other hand | Moving the bag from one hand to the other while standing | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Moving the bag from one hand to the other while standing |
+| H03 | 指尖触耳饰 | 指尖轻碰耳侧配饰，头略侧 | 正面 | 半身 | 自身 | ⚠️ 手部高危 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：指尖轻碰耳侧配饰，头略侧 | Fingertips touching an earring | Fingertips lightly touching an earring, head tilted a little | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Fingertips lightly touching an earring, head tilted a little |
+| H04 | 拨弄耳侧发丝 | 手指把耳侧一缕头发轻轻别向耳后 | 3-4侧 | 半身 | 自身(发) | ✅ | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：手指把耳侧一缕头发轻轻别向耳后 | Tucking hair behind the ear | Fingers guiding a strand of hair back behind the ear | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Fingers guiding a strand of hair back behind the ear |
+| H05 | 拢发到耳后 | 手掌拢起一侧头发别到耳后，露出耳部与耳饰 | 全侧 | 半身 | 自身(发) | ⚠️ 发量与发长 | 机位：全侧·平视 ｜ 远近：半身 ｜ 动作：手掌拢起一侧头发别到耳后，露出耳部与耳饰 | Sweeping hair behind the ear | Palm sweeping one side of the hair behind the ear, revealing the ear and earrings | Camera: Full side profile · eye level ｜ Framing: half body ｜ Action: Palm sweeping one side of the hair behind the ear, revealing the ear and earrings |
+| H06 | 理发尾到肩前 | 低头把发尾从背后拢到肩前 | 正面 | 半身 | 自身(发) | ⚠️ 发长 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：低头把发尾从背后拢到肩前 | Bringing hair over one shoulder | Head down bringing the ends of the hair from behind over one shoulder | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Head down bringing the ends of the hair from behind over one shoulder |
+| H07 | 看腕表时间 | 低头看腕部时间，另一手虚扶腕带 | 正面(俯拍) | 局部特写 | 自身 | ⚠️ 腕表位置 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：低头看腕部时间，另一手虚扶腕带 | Checking a wristwatch | Head down checking the time on the wrist, the other hand steadying the band | Camera: Front view · high angle ｜ Framing: close-up detail ｜ Action: Head down checking the time on the wrist, the other hand steadying the band |
+| H08 | 整理袖口 | 手指捏住袖口往上轻推，露出腕部配饰 | 背面(过肩) | 七分 | 自身 | ⚠️ 袖长不得变 | 机位：背面·过肩 ｜ 远近：七分 ｜ 动作：手指捏住袖口往上轻推，露出腕部配饰 | Straightening the cuffs | Fingers pushing a cuff up slightly, revealing the wrist | Camera: Back view · over the shoulder ｜ Framing: three-quarter length ｜ Action: Fingers pushing a cuff up slightly, revealing the wrist |
+| H09 | 拉正外套衣襟 | 两手捏住前襟向外轻拉再松手，衣服回弹 | 正面 | 半身 | 自身 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：两手捏住前襟向外轻拉再松手，衣服回弹 | Pulling the front of a jacket straight | Both hands pulling the front panels outward and releasing, the fabric settling back | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Both hands pulling the front panels outward and releasing, the fabric settling back |
+| H10 | 扣一颗纽扣 | 低头扣上/解开一颗前襟纽扣，指尖在扣位 | 3-4侧 | 半身 | 自身 | ⚠️ 纽扣数不得变 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：低头扣上/解开一颗前襟纽扣，指尖在扣位 | Fastening a button | Head down fastening or unfastening one button at the front placket, fingertips at the button | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Head down fastening or unfastening one button at the front placket, fingertips at the button |
+| H11 | 拉上拉链 | 一只手把拉链往上拉，另一手扶住下摆 | 正面 | 半身 | 自身 | ⚠️ 门襟形态 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：一只手把拉链往上拉，另一手扶住下摆 | Pulling up a zip | One hand pulling a zip upward, the other steadying the hem | Camera: Front view · eye level ｜ Framing: half body ｜ Action: One hand pulling a zip upward, the other steadying the hem |
+| H12 | 抚平衣摆褶皱 | 双手把衣摆向下抚平 | 正面 | 七分 | 自身 | ⚠️⚠️ 下摆不得开衩 | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：双手把衣摆向下抚平 | Smoothing the hem | Both hands smoothing the hem downward | Camera: Front view · eye level ｜ Framing: three-quarter length ｜ Action: Both hands smoothing the hem downward |
+| H13 | 口袋翻找手机 | 一只手在口袋里翻找，另一手轻扶袋口 | 3-4侧 | 七分 | 自身 | ⚠️ 袋位不得移位 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：一只手在口袋里翻找，另一手轻扶袋口 | Searching a pocket | One hand searching inside a pocket, the other steadying the pocket edge | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: One hand searching inside a pocket, the other steadying the pocket edge |
+| H14 | 整理项链坠子 | 低头用指尖把坠子摆正 | 正面 | 半身 | 自身 | ⚠️⚠️ 项链长度与坠型 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：低头用指尖把坠子摆正 | Straightening a necklace pendant | Straightening the pendant of a necklace with two fingers | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Straightening the pendant of a necklace with two fingers |
+| H15 | 转动戒指 | 拇指轻转另一只手上的戒指 | 正面(俯拍) | 局部特写 | 自身 | ⚠️ 手部高危 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：拇指轻转另一只手上的戒指 | Turning a ring | Thumb turning a ring on the other hand | Camera: Front view · high angle ｜ Framing: close-up detail ｜ Action: Thumb turning a ring on the other hand |
+| H16 | 手落腰侧口袋边 | 一只手自然落在腰侧口袋边缘，未插入 | 3-4侧 | 七分 | 自身 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：一只手自然落在腰侧口袋边缘，未插入 | Hand resting at the hip pocket | One hand resting naturally at the edge of a hip pocket, not inserted | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: One hand resting naturally at the edge of a hip pocket, not inserted |
+| H17 | 指尖压领带下端 | 指尖轻压领带下端使其归位，头微低看向领口 | 正面 | 半身 | 自身(领带)接触 | ✅ 实测 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：指尖轻压领带下端使其归位，头微低看向领口 | Fingertips pressing the end of a tie | Fingertips pressing the lower end of a tie, head slightly down | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Fingertips pressing the lower end of a tie, head slightly down |
 
 ### P · 道具交互（14）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| P01 | 双手捧咖啡杯 | 双手捧着外带咖啡杯，视线看向画外 | 3-4侧 | 全身 | 道具 | ⚠️ 配饰漂移 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：双手捧着外带咖啡杯，视线看向画外 |
-| P02 | 单手拎杯贴胸 | 一只手拎着杯子，手肘收到身侧贴住胸口 | 正面 | 半身 | 道具 | ⚠️ 手指 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：一只手拎着杯子，手肘收到身侧贴住胸口 |
-| P03 | 啜饮一口 | 低头喝一口，杯口贴唇，眼睛看向别处 | 3-4侧 | 半身 | 道具 | ⚠️ 面部遮挡 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：低头喝一口，杯口贴唇，眼睛看向别处 |
-| P04 | 拎纸袋 | 一手拎着纸袋，袋身自然垂落贴腿侧 | 3-4侧 | 全身 | 道具 | ⚠️ 袋上不得有文字 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一手拎着纸袋，袋身自然垂落贴腿侧 |
-| P05 | 低头看手机 | 低头看手里手机，拇指停在屏幕上，肩放松 | 3-4侧 | 七分 | 道具 | ⚠️ 屏幕不得出现文字 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：低头看手里手机，拇指停在屏幕上，肩放松 |
-| P06 | 拿手机拍街景 | 举起手机朝向街景拍，屏幕背对镜头，身体略前倾 | 全侧 | 七分 | 道具 | ⚠️ 手部+比例 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：举起手机朝向街景拍，屏幕背对镜头，身体略前倾 |
-| P07 | 通话中侧头 | 手机贴耳接电话，头部微侧，另一手自然垂落 | 正面 | 半身 | 道具 | ⚠️ 手遮面部 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：手机贴耳接电话，头部微侧，另一手自然垂落 |
-| P08 | 翻看画册 | 站在店内翻看一本画册，手指夹在页缝中 | 3-4侧 | 七分 | 道具 | ⚠️ 页面不得有文字 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：站在店内翻看一本画册，手指夹在页缝中 |
-| P09 | 看菜单/价签 | 低头看手里的小卡片，另一手轻托 | 3-4侧 | 半身 | 道具 | ⚠️ 卡片不得有文字 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：低头看手里的小卡片，另一手轻托 |
-| P10 | 推门进入 | 一只手推开玻璃门，身体正在跨过门槛 | 3-4侧 | 全身 | 环境(门) | ⚠️ 手与门接触点 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一只手推开玻璃门，身体正在跨过门槛 |
-| P11 | 拉门把手回头 | 手拉住门把手，身体已转过来，视线回到镜头方向 | 3-4侧 | 七分 | 环境(门) | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：手拉住门把手，身体已转过来，视线回到镜头方向 |
-| P12 | 扫码付款 | 单手举手机对着台面扫码，视线跟着手机 | 3-4侧 | 半身 | 道具 | ⚠️ 屏幕文字 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：单手举手机对着台面扫码，视线跟着手机 |
-| P13 | 摘墨镜 | 一只手正在把墨镜从脸上摘下的中间态 | 正面 | 半身 | 自身(镜) | ⚠️ 五官遮挡 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：一只手正在把墨镜从脸上摘下的中间态 |
-| P14 | 挎包转身带包 | 挎包随身体转动甩到身后，手仍扶在包带上 | 全侧 | 七分 | 道具 | ⚠️ 包型+配饰 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：挎包随身体转动甩到身后，手仍扶在包带上 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| P01 | 双手捧咖啡杯 | 双手捧着外带咖啡杯，视线看向画外 | 3-4侧 | 全身 | 道具 | ⚠️ 配饰漂移 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：双手捧着外带咖啡杯，视线看向画外 | Both hands around a takeaway cup | Both hands holding a takeaway cup, gaze off-camera | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Both hands holding a takeaway cup, gaze off-camera |
+| P02 | 单手拎杯贴胸 | 一只手拎着杯子，手肘收到身侧贴住胸口 | 正面 | 半身 | 道具 | ⚠️ 手指 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：一只手拎着杯子，手肘收到身侧贴住胸口 | Cup held close to the chest | One hand holding a cup with the elbow tucked in against the chest | Camera: Front view · eye level ｜ Framing: half body ｜ Action: One hand holding a cup with the elbow tucked in against the chest |
+| P03 | 啜饮一口 | 低头喝一口，杯口贴唇，眼睛看向别处 | 3-4侧 | 半身 | 道具 | ⚠️ 面部遮挡 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：低头喝一口，杯口贴唇，眼睛看向别处 | Taking a sip | Head down taking a sip, cup rim at the lips, eyes looking elsewhere | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Head down taking a sip, cup rim at the lips, eyes looking elsewhere |
+| P04 | 拎纸袋 | 一手拎着纸袋，袋身自然垂落贴腿侧 | 3-4侧 | 全身 | 道具 | ⚠️ 袋上不得有文字 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一手拎着纸袋，袋身自然垂落贴腿侧 | Looking at a watch | Glancing down at a watch on the wrist | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Glancing down at a watch on the wrist |
+| P05 | 低头看手机 | 低头看手里手机，拇指停在屏幕上，肩放松 | 3-4侧 | 七分 | 道具 | ⚠️ 屏幕不得出现文字 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：低头看手里手机，拇指停在屏幕上，肩放松 | Looking down at a phone | Head down looking at a phone in hand, thumb resting on the screen, shoulders relaxed | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Head down looking at a phone in hand, thumb resting on the screen, shoulders relaxed |
+| P06 | 拿手机拍街景 | 举起手机朝向街景拍，屏幕背对镜头，身体略前倾 | 全侧 | 七分 | 道具 | ⚠️ 手部+比例 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：举起手机朝向街景拍，屏幕背对镜头，身体略前倾 | Taking a photo of the street | One hand raising a phone toward the street, the screen away from the camera, body leaning slightly forward | Camera: Full side profile · eye level ｜ Framing: three-quarter length ｜ Action: One hand raising a phone toward the street, the screen away from the camera, body leaning slightly forward |
+| P07 | 通话中侧头 | 手机贴耳接电话，头部微侧，另一手自然垂落 | 正面 | 半身 | 道具 | ⚠️ 手遮面部 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：手机贴耳接电话，头部微侧，另一手自然垂落 | On a call, head turned | Phone at the ear on a call, head turned slightly, the other arm hanging naturally | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Phone at the ear on a call, head turned slightly, the other arm hanging naturally |
+| P08 | 翻看画册 | 站在店内翻看一本画册，手指夹在页缝中 | 3-4侧 | 七分 | 道具 | ⚠️ 页面不得有文字 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：站在店内翻看一本画册，手指夹在页缝中 | Flipping through a book | Standing in the shop flipping through a picture book, fingers holding the page seam | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Standing in the shop flipping through a picture book, fingers holding the page seam |
+| P09 | 看菜单/价签 | 低头看手里的小卡片，另一手轻托 | 3-4侧 | 半身 | 道具 | ⚠️ 卡片不得有文字 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：低头看手里的小卡片，另一手轻托 | Reading a menu or tag | Head down reading a small card in one hand, the other hand supporting it | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Head down reading a small card in one hand, the other hand supporting it |
+| P10 | 推门进入 | 一只手推开玻璃门，身体正在跨过门槛 | 3-4侧 | 全身 | 环境(门) | ⚠️ 手与门接触点 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：一只手推开玻璃门，身体正在跨过门槛 | Pushing a door open | One hand pushing a glass door open, the body mid-step over the threshold | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: One hand pushing a glass door open, the body mid-step over the threshold |
+| P11 | 拉门把手回头 | 手拉住门把手，身体已转过来，视线回到镜头方向 | 3-4侧 | 七分 | 环境(门) | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：手拉住门把手，身体已转过来，视线回到镜头方向 | Pulling the door handle, turning back | Hand on the door handle, body already turned, gaze coming back toward the camera | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Hand on the door handle, body already turned, gaze coming back toward the camera |
+| P12 | 扫码付款 | 单手举手机对着台面扫码，视线跟着手机 | 3-4侧 | 半身 | 道具 | ⚠️ 屏幕文字 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：单手举手机对着台面扫码，视线跟着手机 | Scanning to pay | One hand raising a phone toward a counter to scan, gaze following the phone | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: One hand raising a phone toward a counter to scan, gaze following the phone |
+| P13 | 摘墨镜 | 一只手正在把墨镜从脸上摘下的中间态 | 正面 | 半身 | 自身(镜) | ⚠️ 五官遮挡 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：一只手正在把墨镜从脸上摘下的中间态 | Taking off sunglasses | One hand caught mid-motion taking sunglasses off the face | Camera: Front view · eye level ｜ Framing: half body ｜ Action: One hand caught mid-motion taking sunglasses off the face |
+| P14 | 挎包转身带包 | 挎包随身体转动甩到身后，手仍扶在包带上 | 全侧 | 七分 | 道具 | ⚠️ 包型+配饰 | 机位：全侧·平视 ｜ 远近：七分 ｜ 动作：挎包随身体转动甩到身后，手仍扶在包带上 | Turning away with a shoulder bag | Turning away with a shoulder bag swinging slightly at the side | Camera: Full side profile · eye level ｜ Framing: three-quarter length ｜ Action: Turning away with a shoulder bag swinging slightly at the side |
 
 ### G · 视线与情绪（11）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| G01 | 直视镜头自然微笑 | 直视镜头，嘴角自然上扬，眼睛也跟着笑 | 正面 | 半身 | 无 | ✅（计入看镜头） | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：直视镜头，嘴角自然上扬，眼睛也跟着笑 |
-| G02 | 直视镜头平静 | 直视镜头，表情平静轻抿，不刻意用力 | 正面 | 半身 | 无 | ✅（计入看镜头） | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：直视镜头，表情平静轻抿，不刻意用力 |
-| G03 | 侧目看镜头 | 头部略转向画外，视线侧过来看镜头 | 3-4侧 | 半身 | 无 | ✅（计入看镜头） | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：头部略转向画外，视线侧过来看镜头 |
-| G04 | 越过镜头看远处 | 视线越过镜头看向远处某点，像在看街上的人 | 正面 | 七分 | 无 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：视线越过镜头看向远处某点，像在看街上的人 |
-| G05 | 低头看地面 | 低头看着脚下的地面，睫毛低垂 | 3-4侧 | 七分 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：低头看着脚下的地面，睫毛低垂 |
-| G06 | 抬头看树叶天光 | 微微仰头看树叶与天光，下巴与颈部线条舒展 | 3-4侧 | 半身 | 无 | ⚠️ 仰头易改下颌线 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：微微仰头看树叶与天光，下巴与颈部自然舒展，肩部放松 |
-| G07 | 闭眼感受风 | 闭眼，像在感受风，嘴角放松 | 正面 | 半身 | 无 | ⚠️ 闭眼易改眼型 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：闭眼，像在感受风，嘴角放松 |
-| G08 | 看向画外若有所思 | 视线落在画外某点，表情放空 | 全侧 | 半身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：半身 ｜ 动作：视线落在画外某点，表情放空 |
-| G09 | 笑出声的瞬间 | 刚笑出声的瞬间，眼睛弯起，肩膀微动 | 正面 | 半身 | 无 | ⚠️ 易夸张 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：刚笑出声的瞬间，眼睛弯起，肩膀微动 |
-| G10 | 抿嘴忍住笑 | 抿着嘴像在忍笑，视线偏向一侧 | 3-4侧 | 半身 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：抿着嘴像在忍笑，视线偏向一侧 |
-| G11 | 正面七分·微抬下巴看光 | 下巴微抬像在看画面上方的光，肩颈线条舒展，视线轻轻越过镜头 | 正面 | 七分 | 无 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：下巴微抬像在看画面上方的光，肩颈线条舒展，视线轻轻越过镜头 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| G01 | 直视镜头自然微笑 | 直视镜头，嘴角自然上扬，眼睛也跟着笑 | 正面 | 半身 | 无 | ✅（计入看镜头） | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：直视镜头，嘴角自然上扬，眼睛也跟着笑 | Looking up at the sky | Chin lifted, looking up at the sky, shoulders relaxed | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Chin lifted, looking up at the sky, shoulders relaxed |
+| G02 | 直视镜头平静 | 直视镜头，表情平静轻抿，不刻意用力 | 正面 | 半身 | 无 | ✅（计入看镜头） | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：直视镜头，表情平静轻抿，不刻意用力 | Calm direct look at the camera | Looking straight into the camera, calm expression, lips lightly closed, no forced expression | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Looking straight into the camera, calm expression, lips lightly closed, no forced expression |
+| G03 | 侧目看镜头 | 头部略转向画外，视线侧过来看镜头 | 3-4侧 | 半身 | 无 | ✅（计入看镜头） | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：头部略转向画外，视线侧过来看镜头 | Glancing at the camera | Head turned slightly off-frame, eyes sliding back to the camera | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Head turned slightly off-frame, eyes sliding back to the camera |
+| G04 | 越过镜头看远处 | 视线越过镜头看向远处某点，像在看街上的人 | 正面 | 七分 | 无 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：视线越过镜头看向远处某点，像在看街上的人 | Looking past the camera into the distance | Gaze passing over the camera toward a distant point, as if watching people on the street | Camera: Front view · eye level ｜ Framing: three-quarter length ｜ Action: Gaze passing over the camera toward a distant point, as if watching people on the street |
+| G05 | 低头看地面 | 低头看着脚下的地面，睫毛低垂 | 3-4侧 | 七分 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：低头看着脚下的地面，睫毛低垂 | Looking down at the ground | Looking down at the ground underfoot, lashes lowered | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Looking down at the ground underfoot, lashes lowered |
+| G06 | 抬头看树叶天光 | 微微仰头看树叶与天光，下巴与颈部线条舒展 | 3-4侧 | 半身 | 无 | ⚠️ 仰头易改下颌线 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：微微仰头看树叶与天光，下巴与颈部自然舒展，肩部放松 | Looking up at leaves and sky | Chin slightly raised looking up at leaves and daylight, neck line lengthened | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Chin slightly raised looking up at leaves and daylight, neck line lengthened |
+| G07 | 闭眼感受风 | 闭眼，像在感受风，嘴角放松 | 正面 | 半身 | 无 | ⚠️ 闭眼易改眼型 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：闭眼，像在感受风，嘴角放松 | Eyes closed, feeling the air | Eyes gently closed as if feeling a light breeze, expression relaxed | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Eyes gently closed as if feeling a light breeze, expression relaxed |
+| G08 | 看向画外若有所思 | 视线落在画外某点，表情放空 | 全侧 | 半身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：半身 ｜ 动作：视线落在画外某点，表情放空 | Looking off-camera, pensive | Gaze resting on a point off-camera, expression open and unguarded | Camera: Full side profile · eye level ｜ Framing: half body ｜ Action: Gaze resting on a point off-camera, expression open and unguarded |
+| G09 | 笑出声的瞬间 | 刚笑出声的瞬间，眼睛弯起，肩膀微动 | 正面 | 半身 | 无 | ⚠️ 易夸张 | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：刚笑出声的瞬间，眼睛弯起，肩膀微动 | The moment of laughing out loud | Just burst out laughing, eyes curving, shoulders moving slightly | Camera: Front view · eye level ｜ Framing: half body ｜ Action: Just burst out laughing, eyes curving, shoulders moving slightly |
+| G10 | 抿嘴忍住笑 | 抿着嘴像在忍笑，视线偏向一侧 | 3-4侧 | 半身 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：抿着嘴像在忍笑，视线偏向一侧 | Holding back a smile | Lips pressed as if holding back a smile, gaze drifting to one side | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: Lips pressed as if holding back a smile, gaze drifting to one side |
+| G11 | 正面七分·微抬下巴看光 | 下巴微抬像在看画面上方的光，肩颈线条舒展，视线轻轻越过镜头 | 正面 | 七分 | 无 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：下巴微抬像在看画面上方的光，肩颈线条舒展，视线轻轻越过镜头 | Front three-quarter, chin lifted to the light | Chin lifted slightly as if looking at the light above the frame, neck line lengthened, gaze passing just over the camera | Camera: Front view · eye level ｜ Framing: three-quarter length ｜ Action: Chin lifted slightly as if looking at the light above the frame, neck line lengthened, gaze passing just over the camera |
 
 ### M · 动态抓拍（8）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| M01 | 风掀起衣摆 | 一阵风把衣摆吹起一角，人仍站在原地 | 全侧 | 全身 | 无 | ⚠️⚠️ 下摆形态 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：一阵风把衣摆吹起一角，人仍站在原地 |
-| M02 | 头发被风吹乱 | 头发被风吹起一缕遮住小半张脸 | 3-4侧 | 半身 | 无 | ⚠️ 发长与发色 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：头发被风吹起一缕遮住小半张脸 |
-| M03 | 转身裙摆扬起 | 转身瞬间裙摆向外扬起，脚还没落定 | 全侧 | 全身 | 无 | ⚠️⚠️ 裙长与开衩 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：转身瞬间裙摆向外扬起，脚还没落定 |
-| M04 | 迈步离地瞬间 | 脚掌刚离地、身体重心正在转移的中间态 | 3-4侧 | 全身 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：脚掌刚离地、身体重心正在转移的中间态 |
-| M05 | 手抬到一半 | 手正抬到一半、动作尚未完成 | 正面 | 半身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：手正抬到一半、动作尚未完成 |
-| M06 | 说话时的手势 | 对着画外人说话，手做了个小幅度手势 | 3-4侧 | 七分 | 无 | ⚠️ 手部 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：对着画外人说话，手做了个小幅度手势 |
-| M07 | 快速走过带出模糊 | 走快时人物边缘带出轻微运动模糊，环境是静的 | 全侧 | 全身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：走快时人物边缘带出轻微运动模糊，环境是静的 |
-| M08 | 刚停下的余势 | 刚停下脚步，身体仍有轻微晃动惯性 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：刚停下脚步，身体仍有轻微晃动惯性 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| M01 | 风掀起衣摆 | 一阵风把衣摆吹起一角，人仍站在原地 | 全侧 | 全身 | 无 | ⚠️⚠️ 下摆形态 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：一阵风把衣摆吹起一角，人仍站在原地 | Wind lifting the hem | A gust of wind lifting one corner of the hem while the person stays standing in place | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: A gust of wind lifting one corner of the hem while the person stays standing in place |
+| M02 | 头发被风吹乱 | 头发被风吹起一缕遮住小半张脸 | 3-4侧 | 半身 | 无 | ⚠️ 发长与发色 | 机位：3-4侧·平视 ｜ 远近：半身 ｜ 动作：头发被风吹起一缕遮住小半张脸 | Hair blown by the wind | A strand of hair blown across part of the face by the wind | Camera: Three-quarter view · eye level ｜ Framing: half body ｜ Action: A strand of hair blown across part of the face by the wind |
+| M03 | 转身裙摆扬起 | 转身瞬间裙摆向外扬起，脚还没落定 | 全侧 | 全身 | 无 | ⚠️⚠️ 裙长与开衩 | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：转身瞬间裙摆向外扬起，脚还没落定 | Turning, skirt flaring | Mid-turn with the skirt flaring outward, feet not yet settled | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Mid-turn with the skirt flaring outward, feet not yet settled |
+| M04 | 迈步离地瞬间 | 脚掌刚离地、身体重心正在转移的中间态 | 3-4侧 | 全身 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：脚掌刚离地、身体重心正在转移的中间态 | The instant a foot leaves the ground | Mid-moment as the foot leaves the ground and the weight shifts | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Mid-moment as the foot leaves the ground and the weight shifts |
+| M05 | 手抬到一半 | 手正抬到一半、动作尚未完成 | 正面 | 半身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：半身 ｜ 动作：手正抬到一半、动作尚未完成 | Hand halfway raised | The hand caught halfway up, the movement not yet finished | Camera: Front view · eye level ｜ Framing: half body ｜ Action: The hand caught halfway up, the movement not yet finished |
+| M06 | 说话时的手势 | 对着画外人说话，手做了个小幅度手势 | 3-4侧 | 七分 | 无 | ⚠️ 手部 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：对着画外人说话，手做了个小幅度手势 | Gesturing while talking | Gesturing briefly with one hand while talking to someone off-camera | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Gesturing briefly with one hand while talking to someone off-camera |
+| M07 | 快速走过带出模糊 | 走快时人物边缘带出轻微运动模糊，环境是静的 | 全侧 | 全身 | 无 | ✅ | 机位：全侧·平视 ｜ 远近：全身 ｜ 动作：走快时人物边缘带出轻微运动模糊，环境是静的 | Walking briskly with slight motion blur | Walking quickly so the figure's edges carry slight motion blur while the surroundings stay still | Camera: Full side profile · eye level ｜ Framing: full body ｜ Action: Walking quickly so the figure's edges carry slight motion blur while the surroundings stay still |
+| M08 | 刚停下的余势 | 刚停下脚步，身体仍有轻微晃动惯性 | 正面 | 全身 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：刚停下脚步，身体仍有轻微晃动惯性 | Just stopped moving | Just come to a stop, the body still carrying a slight sway of momentum | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Just come to a stop, the body still carrying a slight sway of momentum |
 
-### D · 局部特写（8）· 9 组版的第 9 张优先给这里
+### D · 局部特写（9）· 9 组版的第 9 张优先给这里
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| D01 | 手部与腕部配饰特写 | 手部与腕部配饰的局部特写，每只手五指齐全、关节方向正确 | 正面(俯拍) | 局部特写 | 自身 | ⚠️⚠️ 手部最易崩 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：手部与腕部的静态局部特写，画面只有手腕、手指与腕上配饰 |
-| D02 | 袖口与手腕特写 | 袖口与手腕交界处的特写，面料褶皱自然 | 3-4侧 | 局部特写 | 自身 | ⚠️ 袖型 | 机位：3-4侧·平视 ｜ 远近：局部特写 ｜ 动作：手腕与袖口交界处的静态局部特写，画面只有手腕、袖口与腕上配饰 |
-| D03 | 领口颈部特写 | 领口与颈部线条特写，项链位置居中 | 正面 | 局部特写 | 自身 | ⚠️ 领型 | 机位：正面·平视 ｜ 远近：局部特写 ｜ 动作：颈侧到锁骨一线的静态局部特写，画面只有颈部、锁骨与颈上配饰 |
-| D04 | 腰线分割特写 | 腰线分割与下摆起点的特写，下摆闭合无开衩 | 全侧 | 局部特写 | 无 | ⚠️⚠️ 开衩 | 机位：全侧·平视 ｜ 远近：局部特写 ｜ 动作：腰部横向分割线的静态局部特写，画面只有腰线与两侧轮廓 |
-| D05 | 鞋与地面特写 | 鞋与地面接触处特写，鞋跟高度与首图一致 | 3-4侧 | 局部特写 | 环境 | ⚠️ 跟高漂移 | 机位：3-4侧·平视 ｜ 远近：局部特写 ｜ 动作：鞋面与地面接触处的静态局部特写，画面只有脚部与地面 |
-| D06 | 包带与肩部特写 | 包带搭在肩上的特写，包身只露一角 | 背面(过肩) | 局部特写 | 道具 | ⚠️ 包型 | 机位：背面·过肩 ｜ 远近：局部特写 ｜ 动作：肩部到斜挎带走势的静态局部特写，画面只有肩线与带子走向 |
-| D07 | 手与道具接触点特写 | 手指握住杯身/袋绳的接触点特写 | 正面(俯拍) | 局部特写 | 道具 | ⚠️⚠️ 手部 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：手与所持物件接触点的静态局部特写，画面只有手指、物件与接触处 |
-| D08 | 面料斜射光特写 | 侧光下面料纹理的特写，织纹清晰、无噪点结块 | 3-4侧 | 局部特写 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：局部特写 ｜ 动作：身体侧面受光面的静态局部特写，画面只有受光面与光线过渡，不含面部 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| D01 | 手部与腕部配饰特写 | 手部与腕部配饰的局部特写，每只手五指齐全、关节方向正确 | 正面(俯拍) | 局部特写 | 自身 | ⚠️⚠️ 手部最易崩 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：手部与腕部的静态局部特写，画面只有手腕、手指与腕上配饰 | Close-up of hands and wrist details | Close-up detail of the hands and wrist accessories, five fingers on each hand with correct joint direction | Camera: Front view · high angle ｜ Framing: close-up detail ｜ Action: Close-up detail of the hands and wrist accessories, five fingers on each hand with correct joint direction |
+| D02 | 袖口与手腕特写 | 袖口与手腕交界处的特写，面料褶皱自然 | 3-4侧 | 局部特写 | 自身 | ⚠️ 袖型 | 机位：3-4侧·平视 ｜ 远近：局部特写 ｜ 动作：手腕与袖口交界处的静态局部特写，画面只有手腕、袖口与腕上配饰 | Close-up of cuff and wrist | Close-up of the cuff and wrist junction, fabric folds reading naturally | Camera: Three-quarter view · eye level ｜ Framing: close-up detail ｜ Action: Close-up of the cuff and wrist junction, fabric folds reading naturally |
+| D03 | 领口颈部特写 | 领口与颈部线条特写，项链位置居中 | 正面 | 局部特写 | 自身 | ⚠️ 领型 | 机位：正面·平视 ｜ 远近：局部特写 ｜ 动作：颈侧到锁骨一线的静态局部特写，画面只有颈部、锁骨与颈上配饰 | Close-up of neckline and collar | Close-up of the neckline, collar and collarbone line, the placket sitting straight | Camera: Front view · eye level ｜ Framing: close-up detail ｜ Action: Close-up of the neckline, collar and collarbone line, the placket sitting straight |
+| D04 | 腰线分割特写 | 腰线分割与下摆起点的特写，下摆闭合无开衩 | 全侧 | 局部特写 | 无 | ⚠️⚠️ 开衩 | 机位：全侧·平视 ｜ 远近：局部特写 ｜ 动作：腰部横向分割线的静态局部特写，画面只有腰线与两侧轮廓 | Close-up of the waistline seam | Close-up of the waistline seam and where the hem starts, the hem closed with no slit | Camera: Full side profile · eye level ｜ Framing: close-up detail ｜ Action: Close-up of the waistline seam and where the hem starts, the hem closed with no slit |
+| D05 | 鞋与地面特写 | 鞋与地面接触处特写，鞋跟高度与首图一致 | 3-4侧 | 局部特写 | 环境 | ⚠️ 跟高漂移 | 机位：3-4侧·平视 ｜ 远近：局部特写 ｜ 动作：鞋面与地面接触处的静态局部特写，画面只有脚部与地面 | Close-up of shoes and ground contact | Close-up of the shoes meeting the ground, heel height matching the hero shot | Camera: Three-quarter view · eye level ｜ Framing: close-up detail ｜ Action: Close-up of the shoes meeting the ground, heel height matching the hero shot |
+| D06 | 包带与肩部特写 | 包带搭在肩上的特写，包身只露一角 | 背面(过肩) | 局部特写 | 道具 | ⚠️ 包型 | 机位：背面·过肩 ｜ 远近：局部特写 ｜ 动作：肩部到斜挎带走势的静态局部特写，画面只有肩线与带子走向 | Close-up of bag strap on the shoulder | Close-up of the bag strap resting on the shoulder, only a corner of the bag in frame | Camera: Back view · over the shoulder ｜ Framing: close-up detail ｜ Action: Close-up of the bag strap resting on the shoulder, only a corner of the bag in frame |
+| D07 | 手与道具接触点特写 | 手指握住杯身/袋绳的接触点特写 | 正面(俯拍) | 局部特写 | 道具 | ⚠️⚠️ 手部 | 机位：正面·俯拍 ｜ 远近：局部特写 ｜ 动作：手与所持物件接触点的静态局部特写，画面只有手指、物件与接触处 | Close-up of hand-to-prop contact | Close-up of the fingers gripping a cup or bag handle at the contact point | Camera: Front view · high angle ｜ Framing: close-up detail ｜ Action: Close-up of the fingers gripping a cup or bag handle at the contact point |
+| D08 | 面料斜射光特写 | 侧光下面料纹理的特写，织纹清晰、无噪点结块 | 3-4侧 | 局部特写 | 无 | ✅ | 机位：3-4侧·平视 ｜ 远近：局部特写 ｜ 动作：身体侧面受光面的静态局部特写，画面只有受光面与光线过渡，不含面部 | Close-up of fabric in raking light | Close-up of the fabric texture in raking side light, weave clear with no clumped noise | Camera: Three-quarter view · eye level ｜ Framing: close-up detail ｜ Action: Close-up of the fabric texture in raking side light, weave clear with no clumped noise |
 
 ### E · 空镜与氛围（5）
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|
-| E01 | 远景空镜带人 | 人物极小地走在远处，街景为主体，环境占画面 80%+ | 正面 | 全景空镜带人 | 无 | ✅ 第 9 张备选 | 机位：正面·平视 ｜ 远近：全景空镜带人 ｜ 动作：人物极小地走在远处，街景为主体，环境占画面 80%+ |
-| E02 | 地面光影与影子 | 以地面投影与人物影子为主的取景，人只露下半身 | 3-4侧 | 全景空镜带人 | 环境 | ✅ | 机位：3-4侧·平视 ｜ 远近：全景空镜带人 ｜ 动作：以地面投影与人物影子为主的取景，人只露下半身 |
-| E03 | 玻璃倒影人影 | 透过橱窗玻璃的倒影取景，人物的虚影叠在店内景象上 | 3-4侧 | 全景空镜带人 | 环境 | ⚠️ 倒影易乱 | 机位：3-4侧·平视 ｜ 远近：全景空镜带人 ｜ 动作：透过橱窗玻璃的倒影取景，人物的虚影叠在店内景象上 |
-| E04 | 街角纵深 | 人物站在街角尽端，纵深走廊式构图 | 正面 | 全景空镜带人 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全景空镜带人 ｜ 动作：人物站在街角尽端，纵深走廊式构图 |
-| E05 | 门洞取景框 | 以门洞/楼梯口为天然画框，人物在框内 | 正面 | 七分 | 环境 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：以门洞/楼梯口为天然画框，人物在框内 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 风险 | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| E01 | 远景空镜带人 | 人物极小地走在远处，街景为主体，环境占画面 80%+ | 正面 | 全景空镜带人 | 无 | ✅ 第 9 张备选 | 机位：正面·平视 ｜ 远近：全景空镜带人 ｜ 动作：人物极小地走在远处，街景为主体，环境占画面 80%+ | Empty room with light on the wall | An empty moment: light falling on the wall, no person in frame | Camera: Front view · eye level ｜ Framing: 全景空镜带人 ｜ Action: An empty moment: light falling on the wall, no person in frame |
+| E02 | 地面光影与影子 | 以地面投影与人物影子为主的取景，人只露下半身 | 3-4侧 | 全景空镜带人 | 环境 | ✅ | 机位：3-4侧·平视 ｜ 远近：全景空镜带人 ｜ 动作：以地面投影与人物影子为主的取景，人只露下半身 | Ground shadow composition | Framed around the shadow and light pattern on the ground, the figure only partly in frame from the waist down | Camera: Three-quarter view · eye level ｜ Framing: 全景空镜带人 ｜ Action: Framed around the shadow and light pattern on the ground, the figure only partly in frame from the waist down |
+| E03 | 玻璃倒影人影 | 透过橱窗玻璃的倒影取景，人物的虚影叠在店内景象上 | 3-4侧 | 全景空镜带人 | 环境 | ⚠️ 倒影易乱 | 机位：3-4侧·平视 ｜ 远近：全景空镜带人 ｜ 动作：透过橱窗玻璃的倒影取景，人物的虚影叠在店内景象上 | Reflection in shop glass | Shot through the reflection in a shop window, the figure's faint reflection layered over the interior | Camera: Three-quarter view · eye level ｜ Framing: 全景空镜带人 ｜ Action: Shot through the reflection in a shop window, the figure's faint reflection layered over the interior |
+| E04 | 街角纵深 | 人物站在街角尽端，纵深走廊式构图 | 正面 | 全景空镜带人 | 无 | ✅ | 机位：正面·平视 ｜ 远近：全景空镜带人 ｜ 动作：人物站在街角尽端，纵深走廊式构图 | Depth down a street corner | The figure standing at the far end of a street corner, a corridor-like receding composition | Camera: Front view · eye level ｜ Framing: 全景空镜带人 ｜ Action: The figure standing at the far end of a street corner, a corridor-like receding composition |
+| E05 | 门洞取景框 | 以门洞/楼梯口为天然画框，人物在框内 | 正面 | 七分 | 环境 | ✅ | 机位：正面·平视 ｜ 远近：七分 ｜ 动作：以门洞/楼梯口为天然画框，人物在框内 | Framed by a doorway | Using a doorway or stair opening as a natural frame, the person standing inside that frame | Camera: Front view · eye level ｜ Framing: three-quarter length ｜ Action: Using a doorway or stair opening as a natural frame, the person standing inside that frame |
 
 ### X · 真实爆款实拍动作（小红书来源 · 2026-09-17 三批＋分享链接共 27 条）
 
@@ -251,35 +259,35 @@ python3 scripts/pipeline_loader.py --list-families             # ② 确认权�
 > 动作已由真人真空间拍出来、平台数据验证过（赞数见来源表），**「真实感」的下限最高**。
 > 配组时优先用它们；风险列 `⚠️ 未实测` = 真实照片里成立，但**还没跑过生图**，首轮跑图后按结果回填 ✅/❌。
 
-| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 归入族 | 风险 | 来源（作者·赞） | 动作提示词（机位·远近·动作） |
-|---|---|---|---|---|---|---|---|---|---|
-| X01 | 双手背后并脚站立 | 正在双手背后、双脚并拢站立的一瞬间，重心居中朝前 | 正面 | 全身 | 自身接触（双手在身后相握） | S | ⚠️ 未实测（反推判高） | momo · 2979 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双手背后、双脚并拢站立的一瞬间，重心居中朝前 |
-| X02 | 侧坐双手交叠腿间 | 正在侧坐、双手交叠在腿间、看向画外的一瞬间 | 3-4侧 | 七分 | 自身＋环境接触（坐于椅面） | T | ⚠️ 未实测（交叠手指易崩） | Xzz CharmingL · 359 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：正在侧坐、双手交叠在腿间、看向画外的一瞬间 |
-| X03 | 侧坐长椅臂搭桌握杯 | 正在侧坐长椅、双腿交叠、右臂搭桌握杯、左手插袋的一瞬间，看向画外 | 3-4侧 | 全身 | 道具接触（握杯）＋环境接触（长椅/桌面） | T | ⚠️ 未实测（握杯手易崩） | 小雪 · 111 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧坐长椅、双腿交叠、右臂搭桌握杯、左手插袋的一瞬间，看向画外 |
-| X04 | 坐靠长椅屈腿回头 | 正在坐靠长椅、双腿屈向一侧、右手搭座面、转头看镜头的一瞬间 | 3-4侧(俯拍) | 七分 | 环境接触（背靠长椅）＋自身接触（手插袋） | T | ⚠️ 未实测（反推判高） | ines723 · 112 | 机位：3-4侧·俯拍 ｜ 远近：七分 ｜ 动作：正在坐靠长椅、双腿屈向一侧、右手搭座面、转头看镜头的一瞬间 |
-| X05 | 侧坐倚背伸臂握杯 | 正在侧坐倚背、双腿交叠前伸、伸手握杯的一瞬间，低头 | 3-4侧 | 全身 | 道具接触（握杯）＋环境接触（椅背） | T | ⚠️ 未实测（握杯＋交叠腿） | 吕雅洁LV · 108 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧坐倚背、双腿交叠前伸、伸手握杯的一瞬间，低头 |
-| X06 | 提包迈步下台阶 | 正在提包迈步下台阶的一瞬间，重心前移 | 正面(轻微仰拍) | 全身 | 道具接触（提包）＋环境接触（台阶） | W | ⚠️ 未实测（提包手易崩） | ssYY · 107 | 机位：正面·仰拍 ｜ 远近：全身 ｜ 动作：正在提包迈步下台阶的一瞬间，重心前移 |
-| X07 | 双脚交叠站立举手机 | 正在双脚交叠站立、一手举手机一手提包的一瞬间，视线不可见 | 正面 | 全身 | 道具接触（手机＋包） | S | ⚠️ 未实测（手指与包带易崩） | Sereinmidsummer · 461 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双脚交叠站立、一手举手机一手提包的一瞬间，视线不可见 |
-| X08 | 坐台阶托腮持杯 | 正在侧坐台阶、双腿交叠、左手托腮右手持杯的一瞬间，看向画外 | 3-4侧 | 全身 | 环境＋自身＋道具三重接触 | T | ⚠️ 未实测（手脸接触易崩） | TITI · 133 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧坐台阶、双腿交叠、左手托腮右手持杯的一瞬间，看向画外 |
-| X09 | 坐椅屈膝俯身托头 | 正在坐椅屈膝并腿、俯身左倾，左手托头右臂搭膝的一瞬间 | 3-4侧 | 全身 | 自身接触（左手托头、右臂搭膝）＋环境接触（坐椅） | T | ⚠️ 未实测（肢体交叠易崩） | moomoovalues · 84 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在坐椅屈膝并腿、俯身左倾，左手托头右臂搭膝的一瞬间 |
-| X10 | 跨步提包后摆 | 正在右腿前跨、左腿蹬地，左手提包后摆的一瞬间 | 3-4侧 | 全身 | 道具接触（提包）＋环境接触（地面） | W | ⚠️ 未实测（提包与跨步易错位） | 刘木芯 · 82 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在右腿前跨、左腿蹬地，左手提包后摆的一瞬间 |
-| X11 | 坐台阶屈膝搭包 | 正在侧身坐台阶、一腿屈膝抬起并双手搭包的一瞬间 | 3-4侧 | 全身 | 道具接触（手提包）＋环境接触（台阶） | T | ⚠️ 未实测（手包与手指易错位） | MIMIi · 64 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧身坐台阶、一腿屈膝抬起并双手搭包的一瞬间 |
-| X12 | 坐台阶托肘扶腰 | 正在坐台阶一膝托肘、另手扶腰、双脚交叠的一瞬间 | 3-4侧 | 全身 | 自身接触（手托下巴）＋环境接触（台阶·靠墙） | T | ⚠️ 未实测（托腮手与交叠脚易崩） | 子也 · 63 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在坐台阶一膝托肘、另手扶腰、双脚交叠的一瞬间 |
-| X13 | 背靠墙插袋提包 | 正在背靠墙左手插袋、右手提包站立的一瞬间 | 正面 | 全身 | 道具接触（提包）＋环境接触（墙面） | S | ⚠️ 未实测（双手各做不同事易错） | Awake阿姨 · 1907 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在背靠墙左手插袋、右手提包站立的一瞬间 |
-| X14 | 坐凳交叠腿前倾持手机 | 正在坐凳交叠双腿、身体前倾，一手撑膝持手机另一手握包的一瞬间 | 正面 | 全身 | 自身＋道具（手机·包）＋环境接触（坐凳） | T | ⚠️ 未实测（交叠肢体与持物手易错）· ⚠️ 来源为镜面自拍，出图须改非镜面 | JuJu-K · 1809 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在坐凳交叠双腿、身体前倾，一手撑膝持手机另一手握包的一瞬间 |
-| X15 | 单腿承重屈膝后抬触唇 | 正在单腿承重、另一腿屈膝后抬并以手触唇的一瞬间 | 正面 | 全身 | 自身接触（手指触唇） | S | ⚠️⚠️ 未实测（手脸接触＋屈腿后抬双难点，且近网红摆拍边界，慎用） | Rozannazhan · 1548 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在单腿承重、另一腿屈膝后抬并以手触唇的一瞬间 |
-| X16 | 举手机自拍插袋并脚站 | 正在单手举手机自拍、另一手插袋，双脚并拢站立的一瞬间，视线不可见 | 正面(轻俯拍) | 全身 | 道具接触（手机） | S | ⚠️ 未实测（持手机手易崩）· ⚠️ 来源为镜面自拍，出图须改非镜面 | 笨 · 849 | 机位：正面·俯拍 ｜ 远近：全身 ｜ 动作：正在单手举手机自拍、另一手插袋，双脚并拢站立的一瞬间，视线不可见 |
-| X17 | 屈膝侧收搭膝后倚 | 正在屈膝侧收、单手搭膝、身体后倚并低头的一瞬间 | 正面(俯拍) | 七分 | 自身接触（手搭膝）＋环境接触（座椅） | T | ⚠️ 未实测（屈腿重叠与手部易崩） | 瓷瓷瓷 · 190 | 机位：正面·俯拍 ｜ 远近：七分 ｜ 动作：正在屈膝侧收、单手搭膝、身体后倚并低头的一瞬间 |
-| X18 | 举杯外伸交叉站 | 正在右手举杯外伸、双脚交叉站立的一瞬间，低头 | 正面 | 全身 | 道具接触（纸杯） | S | ⚠️ 未实测（握杯手易崩） | Amber卡卡 · 160 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在右手举杯外伸、双脚交叉站立的一瞬间，低头 |
-| X19 | 仰躺沙发屈膝托头持杯 | 正在仰躺屈膝抬腿、一手托后脑一手举杯并看镜头的一瞬间 | 正面(俯拍) | 全身 | 道具接触（水杯）＋环境接触（沙发） | T（**首条卧姿**） | ⚠️⚠️ 未实测（卧姿肢体交叠＋举杯，双高危）· ✅ 边界已定：**保留**（2026-09-17 拍板，见下注） | yohkoh · 602（品牌合作·分享链接） | 机位：正面·俯拍 ｜ 远近：全身 ｜ 动作：正在仰躺屈膝抬腿、一手托后脑一手举杯并看镜头的一瞬间 |
-| X20 | 双手扶腰双腿交叉倚站 | 全身，正在双手扶腰、双腿交叉倚站的一瞬间，看向画外 | 正面 | 全身 | 自身接触（双手触腰）＋环境接触（靠门·地面） | S | ⚠️ 未实测（后腰手与交叉脚易崩） | 不二颜 · 5279（A） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双手扶腰、双腿交叉倚站的一瞬间，看向画外 |
-| X21 | 斜身坐椅举物抬头 | 全身，正在斜身坐椅、左臂搭扶手、右手举物、双踝交叠并抬头的一瞬间 | 3-4侧 | 全身 | 道具接触（手持小物，原图疑似羽毛）＋环境接触（扶手椅） | T | ⚠️ 未实测（持物手指与交叠脚易错） | 若怀特 · 734（A） | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在斜身坐椅、左臂搭扶手、右手举物、双踝交叠并抬头的一瞬间 |
-| X22 | 迈步停顿重心后置 | 全身，正在迈步停顿、前腿伸出重心落后腿的一瞬间，侧目看镜头 | 3-4侧 | 全身 | 道具接触（肩托包） | W | ⚠️ 未实测（手部遮挡与提包易错） | 好爱吃火锅～ · 676（A） | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在迈步停顿、前腿伸出重心落后腿的一瞬间，侧目看镜头 |
-| X23 | 侧身迈步近侧提包 | 七分景，正在侧身迈步、前腿屈膝、近侧手提包并看镜头的一瞬间 | 3-4侧 | 七分 | 道具接触（手提包） | W | ⚠️ 未实测（提包与遮挡手易崩） | 又是庞庞 · 554（A） | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：正在侧身迈步、前腿屈膝、近侧手提包并看镜头的一瞬间 |
-| X24 | 坐椅重心左倾撑椅提包 | 全身，正在重心左倾撑椅提包、双腿右伸交叠的一瞬间，看镜头 | 正面 | 全身 | 道具接触（手提包）＋环境接触（木椅） | T | ⚠️ 未实测（双手与交叠腿易崩） | 羅蛋皮 · 499（A） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在重心左倾撑椅提包、双腿右伸交叠的一瞬间，看镜头 |
-| X25 | 坐台阶举杯扶腰 | 全身，正在坐于台阶、左手举杯右手扶腰的一瞬间，看镜头 | 正面 | 全身 | 道具接触（杯·吸管）＋环境接触（台阶） | T | ⚠️ 未实测（杯与吸管易错位） | JJong · 1496（B） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在坐于台阶、左手举杯右手扶腰的一瞬间，看镜头 |
-| X26 | 坐台面捧杯一膝抬起 | 全身，正在坐姿重心落于臀部、双腿交叠一膝抬起、双手捧杯的一瞬间，看向画外 | 正面 | 全身 | 道具接触（杯·包）＋环境接触（台面·倚墙） | T | ⚠️ 未实测（交叠腿与捧杯手易错） | JuJu-K · 1462（B） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在坐姿重心落于臀部、双腿交叠一膝抬起、双手捧杯的一瞬间，看向画外 |
-| X27 | 双腿错步提包低头 | 全身，正在双腿错步、重心落右腿、左手屈肘提包的一瞬间，低头 | 正面 | 全身 | 道具接触（包带） | W | ⚠️ 未实测（提包手部易失真） | 好爱吃火锅～ · 485（B） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双腿错步、重心落右腿、左手屈肘提包的一瞬间，低头 |
+| 编号 | 动作名 | 提示词片段（可直接粘） | 建议机位 | 建议景别 | 接触 | 归入族 | 风险 | 来源（作者·赞） | 动作提示词（机位·远近·动作） | Action name (EN) | Clip (EN) | Action prompt (EN) (camera · framing · action) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| X01 | 双手背后并脚站立 | 正在双手背后、双脚并拢站立的一瞬间，重心居中朝前 | 正面 | 全身 | 自身接触（双手在身后相握） | S | ⚠️ 未实测（反推判高） | momo · 2979 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双手背后、双脚并拢站立的一瞬间，重心居中朝前 | Standing, hands clasped behind | Mid-moment of standing with hands clasped behind the back and feet together, weight centred facing forward | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Mid-moment of standing with hands clasped behind the back and feet together, weight centred facing forward |
+| X02 | 侧坐双手交叠腿间 | 正在侧坐、双手交叠在腿间、看向画外的一瞬间 | 3-4侧 | 七分 | 自身＋环境接触（坐于椅面） | T | ⚠️ 未实测（交叠手指易崩） | Xzz CharmingL · 359 | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：正在侧坐、双手交叠在腿间、看向画外的一瞬间 | Seated side-on, hands in lap | Mid-moment of sitting side-on with hands layered in the lap, looking off-camera | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Mid-moment of sitting side-on with hands layered in the lap, looking off-camera |
+| X03 | 侧坐长椅臂搭桌握杯 | 正在侧坐长椅、双腿交叠、右臂搭桌握杯、左手插袋的一瞬间，看向画外 | 3-4侧 | 全身 | 道具接触（握杯）＋环境接触（长椅/桌面） | T | ⚠️ 未实测（握杯手易崩） | 小雪 · 111 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧坐长椅、双腿交叠、右臂搭桌握杯、左手插袋的一瞬间，看向画外 | Side-seated on a bench, arm on table holding a cup | Seated sideways on a bench with legs crossed, right arm resting on a table holding a cup, other hand in pocket, looking off-frame | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated sideways on a bench with legs crossed, right arm resting on a table holding a cup, other hand in pocket, looking off-frame |
+| X04 | 坐靠长椅屈腿回头 | 正在坐靠长椅、双腿屈向一侧、右手搭座面、转头看镜头的一瞬间 | 3-4侧(俯拍) | 七分 | 环境接触（背靠长椅）＋自身接触（手插袋） | T | ⚠️ 未实测（反推判高） | ines723 · 112 | 机位：3-4侧·俯拍 ｜ 远近：七分 ｜ 动作：正在坐靠长椅、双腿屈向一侧、右手搭座面、转头看镜头的一瞬间 | Sitting back on a bench, looking back | Mid-moment of sitting back on a bench with both legs turned to one side, right hand on the seat, head turning to the camera | Camera: Three-quarter view · high angle ｜ Framing: three-quarter length ｜ Action: Mid-moment of sitting back on a bench with both legs turned to one side, right hand on the seat, head turning to the camera |
+| X05 | 侧坐倚背伸臂握杯 | 正在侧坐倚背、双腿交叠前伸、伸手握杯的一瞬间，低头 | 3-4侧 | 全身 | 道具接触（握杯）＋环境接触（椅背） | T | ⚠️ 未实测（握杯＋交叠腿） | 吕雅洁LV · 108 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧坐倚背、双腿交叠前伸、伸手握杯的一瞬间，低头 | Seated leaning back, reaching out holding a cup | Seated leaning back with legs crossed and extended, one arm reaching out holding a cup, head lowered | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated leaning back with legs crossed and extended, one arm reaching out holding a cup, head lowered |
+| X06 | 提包迈步下台阶 | 正在提包迈步下台阶的一瞬间，重心前移 | 正面(轻微仰拍) | 全身 | 道具接触（提包）＋环境接触（台阶） | W | ⚠️ 未实测（提包手易崩） | ssYY · 107 | 机位：正面·仰拍 ｜ 远近：全身 ｜ 动作：正在提包迈步下台阶的一瞬间，重心前移 | Carrying a bag, stepping down | Mid-moment of stepping down while carrying a bag, weight shifted forward | Camera: Front view · low angle ｜ Framing: full body ｜ Action: Mid-moment of stepping down while carrying a bag, weight shifted forward |
+| X07 | 双脚交叠站立举手机 | 正在双脚交叠站立、一手举手机一手提包的一瞬间，视线不可见 | 正面 | 全身 | 道具接触（手机＋包） | S | ⚠️ 未实测（手指与包带易崩） | Sereinmidsummer · 461 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双脚交叠站立、一手举手机一手提包的一瞬间，视线不可见 | Feet crossed standing, phone raised | Standing with feet crossed, one hand raising a phone and the other carrying a bag, gaze not visible | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Standing with feet crossed, one hand raising a phone and the other carrying a bag, gaze not visible |
+| X08 | 坐台阶托腮持杯 | 正在侧坐台阶、双腿交叠、左手托腮右手持杯的一瞬间，看向画外 | 3-4侧 | 全身 | 环境＋自身＋道具三重接触 | T | ⚠️ 未实测（手脸接触易崩） | TITI · 133 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧坐台阶、双腿交叠、左手托腮右手持杯的一瞬间，看向画外 | Seated on a step, chin rested on hand holding a cup | Seated sideways on a step with legs crossed, chin propped on one hand, the other holding a cup, looking off-frame | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated sideways on a step with legs crossed, chin propped on one hand, the other holding a cup, looking off-frame |
+| X09 | 坐椅屈膝俯身托头 | 正在坐椅屈膝并腿、俯身左倾，左手托头右臂搭膝的一瞬间 | 3-4侧 | 全身 | 自身接触（左手托头、右臂搭膝）＋环境接触（坐椅） | T | ⚠️ 未实测（肢体交叠易崩） | moomoovalues · 84 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在坐椅屈膝并腿、俯身左倾，左手托头右臂搭膝的一瞬间 | Seated on a chair, leaning forward head propped | Seated on a chair with knees together, leaning forward and to the left, one hand propping the head, the other arm resting on the knee | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated on a chair with knees together, leaning forward and to the left, one hand propping the head, the other arm resting on the knee |
+| X10 | 跨步提包后摆 | 正在右腿前跨、左腿蹬地，左手提包后摆的一瞬间 | 3-4侧 | 全身 | 道具接触（提包）＋环境接触（地面） | W | ⚠️ 未实测（提包与跨步易错位） | 刘木芯 · 82 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在右腿前跨、左腿蹬地，左手提包后摆的一瞬间 | Striding forward with a bag swinging back | Right leg striding forward, left leg pushing off, a bag in the left hand swinging back | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Right leg striding forward, left leg pushing off, a bag in the left hand swinging back |
+| X11 | 坐台阶屈膝搭包 | 正在侧身坐台阶、一腿屈膝抬起并双手搭包的一瞬间 | 3-4侧 | 全身 | 道具接触（手提包）＋环境接触（台阶） | T | ⚠️ 未实测（手包与手指易错位） | MIMIi · 64 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在侧身坐台阶、一腿屈膝抬起并双手搭包的一瞬间 | Seated on a step, knee raised, both hands on a bag | Seated sideways on a step with one knee raised, both hands resting on a bag | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated sideways on a step with one knee raised, both hands resting on a bag |
+| X12 | 坐台阶托肘扶腰 | 正在坐台阶一膝托肘、另手扶腰、双脚交叠的一瞬间 | 3-4侧 | 全身 | 自身接触（手托下巴）＋环境接触（台阶·靠墙） | T | ⚠️ 未实测（托腮手与交叠脚易崩） | 子也 · 63 | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在坐台阶一膝托肘、另手扶腰、双脚交叠的一瞬间 | Seated on a step, elbow propped, hand on waist | Seated on a step with one knee propping an elbow, the other hand on the waist, ankles crossed | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated on a step with one knee propping an elbow, the other hand on the waist, ankles crossed |
+| X13 | 背靠墙插袋提包 | 正在背靠墙左手插袋、右手提包站立的一瞬间 | 正面 | 全身 | 道具接触（提包）＋环境接触（墙面） | S | ⚠️ 未实测（双手各做不同事易错） | Awake阿姨 · 1907 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在背靠墙左手插袋、右手提包站立的一瞬间 | Back to the wall, hand in pocket | Mid-moment of standing back against the wall, left hand in a pocket, right hand carrying a bag | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Mid-moment of standing back against the wall, left hand in a pocket, right hand carrying a bag |
+| X14 | 坐凳交叠腿前倾持手机 | 正在坐凳交叠双腿、身体前倾，一手撑膝持手机另一手握包的一瞬间 | 正面 | 全身 | 自身＋道具（手机·包）＋环境接触（坐凳） | T | ⚠️ 未实测（交叠肢体与持物手易错）· ⚠️ 来源为镜面自拍，出图须改非镜面 | JuJu-K · 1809 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在坐凳交叠双腿、身体前倾，一手撑膝持手机另一手握包的一瞬间 | Seated on a stool, legs crossed, leaning forward with a phone | Seated on a stool with legs crossed, leaning forward, one hand on the knee holding a phone and the other holding a bag | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Seated on a stool with legs crossed, leaning forward, one hand on the knee holding a phone and the other holding a bag |
+| X15 | 单腿承重屈膝后抬触唇 | 正在单腿承重、另一腿屈膝后抬并以手触唇的一瞬间 | 正面 | 全身 | 自身接触（手指触唇） | S | ⚠️⚠️ 未实测（手脸接触＋屈腿后抬双难点，且近网红摆拍边界，慎用） | Rozannazhan · 1548 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在单腿承重、另一腿屈膝后抬并以手触唇的一瞬间 | Single-leg weight, rear leg lifted | Mid-moment of balancing on one leg with the other knee bent and lifted, fingers touching the lips | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Mid-moment of balancing on one leg with the other knee bent and lifted, fingers touching the lips |
+| X16 | 举手机自拍插袋并脚站 | 正在单手举手机自拍、另一手插袋，双脚并拢站立的一瞬间，视线不可见 | 正面(轻俯拍) | 全身 | 道具接触（手机） | S | ⚠️ 未实测（持手机手易崩）· ⚠️ 来源为镜面自拍，出图须改非镜面 | 笨 · 849 | 机位：正面·俯拍 ｜ 远近：全身 ｜ 动作：正在单手举手机自拍、另一手插袋，双脚并拢站立的一瞬间，视线不可见 | Phone selfie with hand in pocket, feet together | Taking a selfie with one hand raising a phone, the other in pocket, feet together, gaze not visible | Camera: Front view · high angle ｜ Framing: full body ｜ Action: Taking a selfie with one hand raising a phone, the other in pocket, feet together, gaze not visible |
+| X17 | 屈膝侧收搭膝后倚 | 正在屈膝侧收、单手搭膝、身体后倚并低头的一瞬间 | 正面(俯拍) | 七分 | 自身接触（手搭膝）＋环境接触（座椅） | T | ⚠️ 未实测（屈腿重叠与手部易崩） | 瓷瓷瓷 · 190 | 机位：正面·俯拍 ｜ 远近：七分 ｜ 动作：正在屈膝侧收、单手搭膝、身体后倚并低头的一瞬间 | Knees drawn to the side, hand on knee, leaning back | Knees drawn to one side, one hand resting on the knee, upper body leaning back, head lowered | Camera: Front view · high angle ｜ Framing: three-quarter length ｜ Action: Knees drawn to one side, one hand resting on the knee, upper body leaning back, head lowered |
+| X18 | 举杯外伸交叉站 | 正在右手举杯外伸、双脚交叉站立的一瞬间，低头 | 正面 | 全身 | 道具接触（纸杯） | S | ⚠️ 未实测（握杯手易崩） | Amber卡卡 · 160 | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在右手举杯外伸、双脚交叉站立的一瞬间，低头 | Holding a cup out with crossed feet | One arm holding a cup out to the side, feet crossed, head lowered | Camera: Front view · eye level ｜ Framing: full body ｜ Action: One arm holding a cup out to the side, feet crossed, head lowered |
+| X19 | 仰躺沙发屈膝托头持杯 | 正在仰躺屈膝抬腿、一手托后脑一手举杯并看镜头的一瞬间 | 正面(俯拍) | 全身 | 道具接触（水杯）＋环境接触（沙发） | T（**首条卧姿**） | ⚠️⚠️ 未实测（卧姿肢体交叠＋举杯，双高危）· ✅ 边界已定：**保留**（2026-09-17 拍板，见下注） | yohkoh · 602（品牌合作·分享链接） | 机位：正面·俯拍 ｜ 远近：全身 ｜ 动作：正在仰躺屈膝抬腿、一手托后脑一手举杯并看镜头的一瞬间 | Reclining on a sofa, knees up, head propped, cup in hand | Reclining with knees raised, one hand propping the back of the head and the other holding a cup, looking at the camera | Camera: Front view · high angle ｜ Framing: full body ｜ Action: Reclining with knees raised, one hand propping the back of the head and the other holding a cup, looking at the camera |
+| X20 | 双手扶腰双腿交叉倚站 | 全身，正在双手扶腰、双腿交叉倚站的一瞬间，看向画外 | 正面 | 全身 | 自身接触（双手触腰）＋环境接触（靠门·地面） | S | ⚠️ 未实测（后腰手与交叉脚易崩） | 不二颜 · 5279（A） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双手扶腰、双腿交叉倚站的一瞬间，看向画外 | Both hands on the waist, feet crossed, leaning | Both hands resting on the waist, legs crossed, leaning against a surface, looking off-frame | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Both hands resting on the waist, legs crossed, leaning against a surface, looking off-frame |
+| X21 | 斜身坐椅举物抬头 | 全身，正在斜身坐椅、左臂搭扶手、右手举物、双踝交叠并抬头的一瞬间 | 3-4侧 | 全身 | 道具接触（手持小物，原图疑似羽毛）＋环境接触（扶手椅） | T | ⚠️ 未实测（持物手指与交叠脚易错） | 若怀特 · 734（A） | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在斜身坐椅、左臂搭扶手、右手举物、双踝交叠并抬头的一瞬间 | Seated at an angle, arm on the armrest, object raised | Seated at an angle on a chair, left arm on the armrest, right hand raising a small object, ankles crossed, chin lifted | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Seated at an angle on a chair, left arm on the armrest, right hand raising a small object, ankles crossed, chin lifted |
+| X22 | 迈步停顿重心后置 | 全身，正在迈步停顿、前腿伸出重心落后腿的一瞬间，侧目看镜头 | 3-4侧 | 全身 | 道具接触（肩托包） | W | ⚠️ 未实测（手部遮挡与提包易错） | 好爱吃火锅～ · 676（A） | 机位：3-4侧·平视 ｜ 远近：全身 ｜ 动作：正在迈步停顿、前腿伸出重心落后腿的一瞬间，侧目看镜头 | Mid-step pause, weight on the back leg | Pausing mid-step, front leg extended with weight settled on the back leg, glancing sideways at the camera | Camera: Three-quarter view · eye level ｜ Framing: full body ｜ Action: Pausing mid-step, front leg extended with weight settled on the back leg, glancing sideways at the camera |
+| X23 | 侧身迈步近侧提包 | 七分景，正在侧身迈步、前腿屈膝、近侧手提包并看镜头的一瞬间 | 3-4侧 | 七分 | 道具接触（手提包） | W | ⚠️ 未实测（提包与遮挡手易崩） | 又是庞庞 · 554（A） | 机位：3-4侧·平视 ｜ 远近：七分 ｜ 动作：正在侧身迈步、前腿屈膝、近侧手提包并看镜头的一瞬间 | Stepping sideways, bag in near hand | Three-quarter length, mid-moment of stepping sideways with front knee bent, bag in the near hand, glancing at the camera | Camera: Three-quarter view · eye level ｜ Framing: three-quarter length ｜ Action: Three-quarter length, mid-moment of stepping sideways with front knee bent, bag in the near hand, glancing at the camera |
+| X24 | 坐椅重心左倾撑椅提包 | 全身，正在重心左倾撑椅提包、双腿右伸交叠的一瞬间，看镜头 | 正面 | 全身 | 道具接触（手提包）＋环境接触（木椅） | T | ⚠️ 未实测（双手与交叠腿易崩） | 羅蛋皮 · 499（A） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在重心左倾撑椅提包、双腿右伸交叠的一瞬间，看镜头 | Seated on a chair, weight leaning, propping the chair with a bag | Weight shifted to the left propping the chair, a bag in hand, both legs extended to the right and crossed, looking at the camera | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Weight shifted to the left propping the chair, a bag in hand, both legs extended to the right and crossed, looking at the camera |
+| X25 | 坐台阶举杯扶腰 | 全身，正在坐于台阶、左手举杯右手扶腰的一瞬间，看镜头 | 正面 | 全身 | 道具接触（杯·吸管）＋环境接触（台阶） | T | ⚠️ 未实测（杯与吸管易错位） | JJong · 1496（B） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在坐于台阶、左手举杯右手扶腰的一瞬间，看镜头 | Seated on a step, cup raised, hand on waist | Seated on a step, left hand raising a cup and right hand on the waist, looking at the camera | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Seated on a step, left hand raising a cup and right hand on the waist, looking at the camera |
+| X26 | 坐台面捧杯一膝抬起 | 全身，正在坐姿重心落于臀部、双腿交叠一膝抬起、双手捧杯的一瞬间，看向画外 | 正面 | 全身 | 道具接触（杯·包）＋环境接触（台面·倚墙） | T | ⚠️ 未实测（交叠腿与捧杯手易错） | JuJu-K · 1462（B） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在坐姿重心落于臀部、双腿交叠一膝抬起、双手捧杯的一瞬间，看向画外 | Seated on a surface, both hands around a cup, one knee up | Seated with weight on the hips, legs crossed and one knee raised, both hands around a cup, looking off-frame | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Seated with weight on the hips, legs crossed and one knee raised, both hands around a cup, looking off-frame |
+| X27 | 双腿错步提包低头 | 全身，正在双腿错步、重心落右腿、左手屈肘提包的一瞬间，低头 | 正面 | 全身 | 道具接触（包带） | W | ⚠️ 未实测（提包手部易失真） | 好爱吃火锅～ · 485（B） | 机位：正面·平视 ｜ 远近：全身 ｜ 动作：正在双腿错步、重心落右腿、左手屈肘提包的一瞬间，低头 | Feet offset, carrying a bag, head lowered | Feet offset with weight on the right leg, left arm bent at the elbow carrying a bag, head lowered | Camera: Front view · eye level ｜ Framing: full body ｜ Action: Feet offset with weight on the right leg, left arm bent at the elbow carrying a bag, head lowered |
 
 > 来源笔记 = 「make studio fleece mine」（作者 yohkoh，赞 602），实为 **Nike Studio Fleece × TX淮海 × YUEQI QI 的品牌合作内容**。
 > - ✅ **动作可用**：该姿态由真人真空间拍出，动作本身已提炼入库
@@ -530,3 +538,9 @@ $PY $S <spec.md> --strict-families
   （公开名 `references/08-action-library-en.md`）。
   ⚠️ 教训再现：**第三次**「改库不同步声明」——本次由公开仓库体检（`verify_export.py` ⑤ 断言）逮到，
   说明该断言已是有效兜底；纯人眼巡检仍不可靠。
+- **v1.9** 2026-09-21 **全库 135 条动作描述转英文（新增 3 列）**：`Action name (EN)` / `Clip (EN)` /
+  `Action prompt (EN) (camera · framing · action)`。数据源不重造：英文名与描述复用 `action-en-map（本仓库未收录）`（135 条已齐），
+  机位/远近复用 `pipeline_loader.py` 的 `EN_CAM` / `EN_SHOT` 词典（改词典即改口径）。新增工具
+  `scripts/fill_action_prompts_en.py`（`--dry` / `--write` / `--check` 交叉校验）。
+  ⚠️ **踩坑并已断言兜底**：英文三段式若用**半角 `|`** 当段间分隔，Markdown 会把一行拆成多列 →
+  135 行全部多出 2 列；必须用**全角 `｜`**。`verify_export.py` 已加 **⑥b 表格列数一致** 断言。
