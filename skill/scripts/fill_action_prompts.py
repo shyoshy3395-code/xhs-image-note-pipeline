@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import subprocess
 import sys
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -137,13 +138,86 @@ def scan(text: str) -> list[str]:
     return [w for w in BAN if w in text]
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# --sync-counts：把「11 族 N 条」当前声明从 loader 权威值改写（2026-09-21）
+#
+# 为什么要它：动作库的条数声明散在 8 处（SKILL / 06 / 07 / 08 / 10 / 11 / prompts×2），
+# 手改必漏 —— 2026 年内已发生三次「新条目入库、声明落后」（H17 / S17 / S18+G11）。
+# 铁律：条数只认 `pipeline_loader.py --list-families`，别用人工累加。
+#
+# 只改「当前声明」：
+#   ✅ 改：`11 族 133 条`、`11 族 · 135 条 = 106 条规则/实测 + 27 条真实爆款反推`
+#   ❌ 不动：版本历史行（`- **v1.x** …`）、含 `→` 的记录行（如 `+8 条 → 11 族 132 条`）、
+#            `→ 共 11 族 / 133 条` 之外的 loader 输出示例 —— 历史数字是正确的记录，不是陈旧
+# 规则/实测数 = 总数 - X 族数（X 族是「真实爆款反推」，单独计数）。
+# ─────────────────────────────────────────────────────────────────────────────
+COUNT_RE = re.compile(r"(11 族\s*[·\s]\s*\*{0,2})(\d+)(\s*条)")
+SPLIT_RE = re.compile(r"(=\s*\*{0,2})(\d+)(\s*条规则/实测)")
+SKIP_RE = re.compile(r"^\s*-\s+\*\*v\d|→")
+
+
+def authoritative_counts() -> tuple[int, int, int]:
+    """跑 loader 拿权威值 → (总条数, X 族条数, 规则/实测条数)。"""
+    r = subprocess.run([sys.executable, os.path.join(SKILL, "scripts", "pipeline_loader.py"),
+                        "--list-families"], capture_output=True, text=True, cwd=SKILL)
+    m = re.search(r"共\s*(\d+)\s*族\s*/\s*(\d+)\s*条", r.stdout)
+    if not m:
+        raise SystemExit(f"⛔ 无法解析 loader 输出：{r.stdout[-200:]}{r.stderr[-200:]}")
+    total = int(m.group(2))
+    x = int((re.search(r"(\d+)\s+X ·", r.stdout) or [0, "0"])[1] if re.search(r"(\d+)\s+X ·", r.stdout) else 0)
+    return total, x, total - x
+
+
+def sync_counts(write: bool) -> int:
+    total, xn, base_n = authoritative_counts()
+    print(f"loader 权威：{total} 条（X 族 {xn} · 规则/实测 {base_n}）\n")
+    targets = ["SKILL.md", "references/06-iteration-log.md", "references/07-image-gen-constraints.md",
+               "references/08-reverse-prompt-spec.md", "references/10-action-library.md",
+               "references/11-pipeline-orchestration.md", "prompts/00-README.md", "prompts/04-nine-groups.md",
+               # 英文表头部也声明条数（2026-09-21 起）
+               "action-en-map（本仓库未收录）"]
+    changed_total = 0
+    for rel in targets:
+        p = os.path.join(SKILL, rel)
+        if not os.path.exists(p):
+            print(f"  ⚠️ 缺文件跳过：{rel}")
+            continue
+        src = open(p, encoding="utf-8").read()
+        out, n = [], 0
+        for line in src.splitlines():
+            if SKIP_RE.search(line):
+                out.append(line)                      # 历史记录行不动
+                continue
+            new = line
+            if COUNT_RE.search(new):
+                new = COUNT_RE.sub(lambda m: m.group(1) + str(total) + m.group(3), new)
+                new = SPLIT_RE.sub(lambda m: m.group(1) + str(base_n) + m.group(3), new)
+            if new != line:
+                n += 1
+            out.append(new)
+        if n:
+            changed_total += n
+            print(f"  ✏️  {rel}：{n} 处 → {total} 条/规则实测 {base_n}")
+            if write:
+                open(p, "w", encoding="utf-8").write("\n".join(out) + "\n")
+        else:
+            print(f"  ✓  {rel}：已一致，无需改")
+    print(f"\n{'✅ 已改写' if write else '（--dry：未写）'} 共 {changed_total} 处声明")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry", action="store_true", help="只打印（默认行为）")
     ap.add_argument("--write", action="store_true", help="回写文件")
     ap.add_argument("--force", action="store_true", help="覆盖已填格（重算）")
     ap.add_argument("--scan", action="store_true", help="只扫禁用词")
+    ap.add_argument("--sync-counts", action="store_true",
+                    help="把「11 族 N 条」当前声明从 loader 权威值改写（历史版本行不动）")
     a = ap.parse_args()
+
+    if a.sync_counts:
+        return sync_counts(a.write)
 
     lib = lib_path()
     lines = read(lib).splitlines()

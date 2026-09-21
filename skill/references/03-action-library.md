@@ -70,6 +70,18 @@
 **产出/维护工具**：`scripts/fill_action_prompts.py`
 （`--scan` 扫禁用词 · `--dry` 干跑 · `--write` 只补空格 · `--write --force` 重算。新增条目后跑一次补空。）
 
+**改完条目后的固定收尾（两步，别漏第一步）**：
+
+```bash
+python3 scripts/fill_action_prompts.py --sync-counts --write   # ① 把「11 族 N 条」当前声明对齐 loader 权威值
+python3 scripts/pipeline_loader.py --list-families             # ② 确认权威值（只认它，别人工累加）
+```
+
+> ⚠️ **为什么必须有 ①**：条数声明散在 **9 处**（`SKILL.md` · `06-iteration-log.md` · `07` · `08` · `10`（§三标题
+> + 版本历史）· `05-pipeline-orchestration.md` · `prompts/00-README.md` · `prompts/04-nine-groups.md` ·
+> `action-en-map（本仓库未收录）`），手改必漏 —— 2026 年内已**三次**「新条目入库、声明落后」（`H17` → `S17` → `S18`+`G11`）。
+> 该命令只改**当前声明**，**不动**版本历史行（`- **v1.x** …`）与含 `→` 的记录行 —— 历史数字是正确的记录，不是陈旧。
+
 > `X` 族（真实爆款反推族 · 27 条）**也已补齐这一列**（v1.7）——它的片段自带前导景别（「全身，正在…」「七分景，正在…」），
 > 生成时由工具**剥掉**，避免与「远近」段重复。X 表列结构多「归入族 / 来源」两列，新列加在**表尾（来源之后）**，
 > 不改那两列的相对位置（`pipeline_loader.load_actions()` 按**表头名**取列，加列不影响解析与计数）。
