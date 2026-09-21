@@ -60,3 +60,46 @@
 | P12 | Scanning to pay | One hand raising a phone toward a counter to scan, gaze following the phone |
 | T04 | Sitting on a low wall, one leg hanging | Sitting on a low wall, one leg hanging down, the other foot resting on the wall edge |
 | T06 | Sitting by the window, hand on a cup | Sitting by the window, one hand resting lightly on a cup, gaze out of the window |
+
+## 维护与排障（英文列交付前必读）
+
+### 1. 覆盖度扫描（新批次开跑前做一次）
+
+英文列一旦缺映射，单元格里会直接印出中文 + 「⚠️ 未收录英文映射」→ 闸门 `--check-en` 必报 FAIL。
+**做法：把「所有空间画像 × 所有行」都跑一遍，取被抽中编号的**并集**，一次性补全**（只补当批用到的不够用，下一批换空间又缺）：
+
+```bash
+# 收集并集（把 8 个空间 × 各行的 pkg 抽出，取 actions[].no）
+python3 scripts/pipeline_loader.py --row 2 --groups 9 --quota relaxed --space 街角 --env x --out /tmp/probe.json
+# → 读 probe.json actions[].no，与 load_action_en_map() 求差集，差集逐条补英文
+```
+
+2026-09-20 实测：并集 **35 条** ＋ 常用安全动作 = **53 条**（本表现有数量）即可覆盖八空间全部抽条结果。
+
+### 2. 接触字段的中文括注（最常漏的一处）
+
+动作库的「接触」列写法很自由：`自身接触（双手在身后相握）`、`自身+鞋接触`、`道具(包)`、`自身＋环境接触（坐于椅面）`。
+`pipeline_loader._en_contact()` 的规则：
+
+- 先判**大前提**（自身 / 环境 / 道具 / 自身＋环境）→ 出 `Self-contact` / `Contact with the environment` / `Contact with the prop` 等纯英文基句；
+- 再用 **`CONTACT_KEYS` 关键词表**把括注翻成英文对象（手→`hands`、鞋靴→`footwear`、包袋→`bag`、椅凳坐→`seat`、墙→`wall`、扶手→`handrail`、杯→`cup`、桌台→`table`、镜→`mirror`、门→`door`、货架→`shelf`、手机→`phone`…）；
+- **兜底直接丢掉中文**，绝不残留。
+
+⚠️ 新增动作若带了库里没有的环境物（例：`桌面`、`栏杆`、`纸袋`），要在 `CONTACT_KEYS` 里补关键词，
+否则该格会回落成基句（不含中文，闸门不报错但语义变粗）。**改完立刻用闸门 `--check-en` 扫一遍**：
+
+```bash
+python3 scripts/verify_image_note_xlsx.py --src <模板> --out <交付> --rows 2 3 4 5 6 \
+    --cols FGHIJKLMN --ref-col Q --check-en --no-blur
+```
+
+### 3. 单元格英文块 vs 生成用提示词（别搞混）
+
+- `render_prompt(pkg, slot)` → **写 Y–AG 单元格**的英文 `[Set N]` 块；
+- `render_prompt_for_gen(pkg, slot)` → **送模型**的提示词（中文锁块【人脸/服装/解剖/禁虚化】＋ 英文环境与动作槽位 ＋ `EN_CONSTRAINT`）。
+- `run_image_note.py` 走后者。**改渲染器时两条链路一起改**，只改一条会出现「单元格好看但出图丢锁」。
+| S18 | Front three-quarter, hand at the waist | One hand resting lightly at the waist, the other arm hanging naturally, steady weight, shoulders relaxed |
+| G11 | Front three-quarter, chin lifted to the light | Chin lifted slightly as if looking at the light above the frame, neck line lengthened, gaze passing just over the camera |
+| G04 | Looking past the camera into the distance | Gaze passing over the camera toward a distant point, as if watching people on the street |
+| E05 | Framed by a doorway | Using a doorway or stair opening as a natural frame, the person standing inside that frame |
+| H12 | Smoothing the hem | Both hands smoothing the hem downward |
