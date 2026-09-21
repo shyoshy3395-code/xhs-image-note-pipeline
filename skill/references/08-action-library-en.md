@@ -160,3 +160,28 @@ python3 scripts/verify_image_note_xlsx.py --src <模板> --out <交付> --rows 2
 | W10 | Crossing the road, mid-way | Walking in the middle of a zebra crossing, the figure small in frame with the environment dominating |
 | W11 | Waiting at a traffic light | Standing at the edge of a junction waiting for the light, feet apart, gaze toward the traffic ahead |
 | W12 | Walking briskly with a bag | Carrying a bag in one hand, slightly longer stride, a hint of hurry |
+
+## X 族 · 真实爆款反推动作（2026-09-21 补齐）
+
+| 编号 | English name | English action description |
+|---|---|---|
+| X03 | Side-seated on a bench, arm on table holding a cup | Seated sideways on a bench with legs crossed, right arm resting on a table holding a cup, other hand in pocket, looking off-frame |
+| X05 | Seated leaning back, reaching out holding a cup | Seated leaning back with legs crossed and extended, one arm reaching out holding a cup, head lowered |
+| X07 | Feet crossed standing, phone raised | Standing with feet crossed, one hand raising a phone and the other carrying a bag, gaze not visible |
+| X08 | Seated on a step, chin rested on hand holding a cup | Seated sideways on a step with legs crossed, chin propped on one hand, the other holding a cup, looking off-frame |
+| X09 | Seated on a chair, leaning forward head propped | Seated on a chair with knees together, leaning forward and to the left, one hand propping the head, the other arm resting on the knee |
+| X10 | Striding forward with a bag swinging back | Right leg striding forward, left leg pushing off, a bag in the left hand swinging back |
+| X11 | Seated on a step, knee raised, both hands on a bag | Seated sideways on a step with one knee raised, both hands resting on a bag |
+| X12 | Seated on a step, elbow propped, hand on waist | Seated on a step with one knee propping an elbow, the other hand on the waist, ankles crossed |
+| X14 | Seated on a stool, legs crossed, leaning forward with a phone | Seated on a stool with legs crossed, leaning forward, one hand on the knee holding a phone and the other holding a bag |
+| X16 | Phone selfie with hand in pocket, feet together | Taking a selfie with one hand raising a phone, the other in pocket, feet together, gaze not visible |
+| X17 | Knees drawn to the side, hand on knee, leaning back | Knees drawn to one side, one hand resting on the knee, upper body leaning back, head lowered |
+| X18 | Holding a cup out with crossed feet | One arm holding a cup out to the side, feet crossed, head lowered |
+| X19 | Reclining on a sofa, knees up, head propped, cup in hand | Reclining with knees raised, one hand propping the back of the head and the other holding a cup, looking at the camera |
+| X20 | Both hands on the waist, feet crossed, leaning | Both hands resting on the waist, legs crossed, leaning against a surface, looking off-frame |
+| X21 | Seated at an angle, arm on the armrest, object raised | Seated at an angle on a chair, left arm on the armrest, right hand raising a small object, ankles crossed, chin lifted |
+| X22 | Mid-step pause, weight on the back leg | Pausing mid-step, front leg extended with weight settled on the back leg, glancing sideways at the camera |
+| X24 | Seated on a chair, weight leaning, propping the chair with a bag | Weight shifted to the left propping the chair, a bag in hand, both legs extended to the right and crossed, looking at the camera |
+| X25 | Seated on a step, cup raised, hand on waist | Seated on a step, left hand raising a cup and right hand on the waist, looking at the camera |
+| X26 | Seated on a surface, both hands around a cup, one knee up | Seated with weight on the hips, legs crossed and one knee raised, both hands around a cup, looking off-frame |
+| X27 | Feet offset, carrying a bag, head lowered | Feet offset with weight on the right leg, left arm bent at the elbow carrying a bag, head lowered |
