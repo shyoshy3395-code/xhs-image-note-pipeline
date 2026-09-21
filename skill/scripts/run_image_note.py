@@ -133,7 +133,12 @@ def main() -> int:
     ap.add_argument("--outdir", required=True)
     ap.add_argument("--cover", required=True, help="参考图1：封面/环境（只借空间光影）")
     ap.add_argument("--face", required=True, help="参考图2：人脸图（锁人物）")
-    ap.add_argument("--up1"), ap.add_argument("--up2"), ap.add_argument("--flat")
+    ap.add_argument("--up1", help="参考图3：R 上身效果图（正面）——服装主源")
+    ap.add_argument("--up2", help="参考图4：S 上身效果图（背面）——服装主源")
+    ap.add_argument("--flat", help="参考图5：T 平铺图（上衣正面）——细节补充")
+    ap.add_argument("--flat2", help="参考图6：U 平铺图（上衣反面）——细节补充")
+    ap.add_argument("--flat3", help="参考图7：V 平铺图（下装正面）——细节补充")
+    ap.add_argument("--flat4", help="参考图8：W 平铺图（下装反面）——细节补充")
     ap.add_argument("--model", default=None)
     ap.add_argument("--size", default=None, help="nano 族写档位（2K/4K）；gpt-image 族写精确像素")
     ap.add_argument("--dry", action="store_true", help="只打印 prompt，不调用模型")
@@ -165,8 +170,9 @@ def main() -> int:
     for f in (a.face, a.up1, a.up2):
         if f:
             refs.append(shrink(f, cache, 1024))
-    if a.flat:
-        refs.append(shrink(a.flat, cache, 768))
+    for f in (a.flat, getattr(a, "flat2", None), getattr(a, "flat3", None), getattr(a, "flat4", None)):
+        if f:
+            refs.append(shrink(f, cache, 768))
     print(f"[行{a.row}] 模型={model} 尺寸={size} 参考图 {len(refs)} 张", flush=True)
 
     hero_base = os.path.join(a.outdir, f"X{a.row}_首图")

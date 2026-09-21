@@ -103,3 +103,22 @@ python3 scripts/verify_image_note_xlsx.py --src <模板> --out <交付> --rows 2
 | G04 | Looking past the camera into the distance | Gaze passing over the camera toward a distant point, as if watching people on the street |
 | E05 | Framed by a doorway | Using a doorway or stair opening as a natural frame, the person standing inside that frame |
 | H12 | Smoothing the hem | Both hands smoothing the hem downward |
+| D02 | Close-up of cuff and wrist | Close-up of the cuff and wrist junction, fabric folds reading naturally |
+| D03 | Close-up of neckline and collar | Close-up of the neckline, collar and collarbone line, the placket sitting straight |
+| D04 | Close-up of the waistline seam | Close-up of the waistline seam and where the hem starts, the hem closed with no slit |
+| D05 | Close-up of shoes and ground contact | Close-up of the shoes meeting the ground, heel height matching the hero shot |
+| D06 | Close-up of bag strap on the shoulder | Close-up of the bag strap resting on the shoulder, only a corner of the bag in frame |
+| D07 | Close-up of hand-to-prop contact | Close-up of the fingers gripping a cup or bag handle at the contact point |
+| D08 | Close-up of fabric in raking light | Close-up of the fabric texture in raking side light, weave clear with no clumped noise |
+| H02 | Switching the bag to the other hand | Moving the bag from one hand to the other while standing |
+| H03 | Fingertips touching an earring | Fingertips lightly touching an earring, head tilted a little |
+| H14 | Straightening a necklace pendant | Straightening the pendant of a necklace with two fingers |
+| C03 | Bending down to pick something up | Bending forward to pick an object off the ground, one hand already extended |
+| P14 | Turning away with a shoulder bag | Turning away with a shoulder bag swinging slightly at the side |
+| P04 | Looking at a watch | Glancing down at a watch on the wrist |
+| H17 | Fingertips pressing the end of a tie | Fingertips pressing the lower end of a tie, head slightly down |
+| G07 | Eyes closed, feeling the air | Eyes gently closed as if feeling a light breeze, expression relaxed |
+| T05 | Sitting at a windowsill, facing out | Sitting at a windowsill facing outward, one hand resting on the ledge |
+| G01 | Looking up at the sky | Chin lifted, looking up at the sky, shoulders relaxed |
+| E01 | Empty room with light on the wall | An empty moment: light falling on the wall, no person in frame |
+| H09 | Pulling the front of a jacket straight | Both hands pulling the front panels outward and releasing, the fabric settling back |

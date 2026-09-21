@@ -61,6 +61,11 @@ QUOTA = {
     "9r": [("正面", "全身", "看镜头"), ("正面", "七分", "看向画外"), ("3-4侧", "七分", "看向画外"),
            ("3-4侧", "半身", "低头"), ("全侧", "全身", "看向画外"), ("全侧", "半身", "看向画外"),
            ("背面", "全身", "不可见"), ("背面", "七分", "低头"), ("正面", "局部特写", "不可见")],
+    # 9s = 2026-09-21 客户新规格：正面全身 ≥1（不再要求 2）+ 3-4侧/全侧/七分/半身/服装特写各 ≥1
+    #      第9组自由补充；看镜头 ≤2；含 1 组服装特写（正面｜局部特写 → 库内 D03 领口/D08 面料 等）
+    "9s": [("正面", "全身", "看镜头"), ("3-4侧", "七分", "看向画外"), ("全侧", "全身", "看向画外"),
+           ("正面", "半身", "看向画外"), ("背面", "全身", "不可见"), ("3-4侧", "半身", "低头"),
+           ("全侧", "七分", "看向画外"), ("正面", "局部特写", "不可见"), ("背面", "七分", "低头")],
 }
 QUOTA_FLOOR = {   # 闸门用：各维度下限（与 04-nine-groups.md 的配额表一致）
     9: {"机位": {"正面": 2, "3-4侧": 2, "全侧": 1, "背面": 1},
@@ -72,6 +77,10 @@ QUOTA_FLOOR = {   # 闸门用：各维度下限（与 04-nine-groups.md 的配�
            "景别": {"全身": 3, "七分": 2, "半身": 2, "局部特写": 1}, "看镜头": 2,
            # 组合口径：正面必须「1 张全身 + 1 张七分」，不许两张都是正面全身
            "组合": {"正面|全身": 1, "正面|七分": 1}},
+    # 2026-09-21 客户新规格下限：正面全身≥1、3-4侧≥1、全侧≥1、七分≥1、半身≥1、服装特写≥1
+    "9s": {"机位": {"正面": 1, "3-4侧": 1, "全侧": 1, "背面": 1},
+           "景别": {"全身": 2, "七分": 1, "半身": 1, "局部特写": 1}, "看镜头": 2,
+           "组合": {"正面|全身": 1}},
 }
 CAM_ALIAS = {"正面": ("正面",), "3-4侧": ("3-4侧", "3-4侧(过肩)", "3-4侧(俯拍)", "3-4侧(仰拍)"),
              "全侧": ("全侧", "全侧(跟拍)"), "背面": ("背面", "背面(过肩)")}
@@ -756,7 +765,7 @@ def main() -> int:
     ap.add_argument("--emit-space", default="", help="把空间推荐结果导出为 MD")
     ap.add_argument("--force", action="store_true", help="--append 时跳过入库校验（不建议）")
     ap.add_argument("--avoid", default="", help="按当次造型追加排除词（逗号分隔，如 包,腕表,咖啡杯）")
-    ap.add_argument("--quota", choices=["std", "relaxed"], default="std",
+    ap.add_argument("--quota", choices=["std", "relaxed", "9s"], default="std",
                     help="配额口径：std=严格版（正面2/3-4侧2/全侧≥1/背面≥1 景别全身4/七分2/半身2/特写1）；relaxed=放宽版（3-4侧≥1/七分≥1/半身≥1，客户 2026-09-18 口径）")
     a = ap.parse_args()
 
@@ -804,7 +813,13 @@ def main() -> int:
         "facts": {"aspect": "3:4", "size_1k": "864x1152", "model": "gpt-image-2-vip", "need_serial": True},
     }
     # 按行号自动位移候选池 → 不同行抽出不同九组；--quota relaxed 切到放宽版配额表
-    _qkey = a.groups if a.quota == "std" else (f"{a.groups}r" if f"{a.groups}r" in QUOTA else a.groups)
+    # 配额档解析：std → "9"；relaxed → "9r"；其余（如 "9s"）只要在 QUOTA 里就直接用
+    if a.quota == "std":
+        _qkey = a.groups
+    elif a.quota == "relaxed":
+        _qkey = f"{a.groups}r" if f"{a.groups}r" in QUOTA else a.groups
+    else:
+        _qkey = a.quota if a.quota in QUOTA else a.groups
     pkg["quota_profile"] = _qkey
     pkg["actions"] = sample_actions(_qkey, load_actions(), a.space, rotate=(a.row or 0) * 11,
                                      extra_avoid=a.avoid)
