@@ -122,3 +122,41 @@ python3 scripts/verify_image_note_xlsx.py --src <模板> --out <交付> --rows 2
 | G01 | Looking up at the sky | Chin lifted, looking up at the sky, shoulders relaxed |
 | E01 | Empty room with light on the wall | An empty moment: light falling on the wall, no person in frame |
 | H09 | Pulling the front of a jacket straight | Both hands pulling the front panels outward and releasing, the fabric settling back |
+| C02 | Crouching to greet a small animal | Crouching low with one hand extended toward a small animal at foot level, weight settled back |
+| C05 | Kneeling to look through a bag | Kneeling on one knee, head down looking through the items in a bag on the ground |
+| E02 | Ground shadow composition | Framed around the shadow and light pattern on the ground, the figure only partly in frame from the waist down |
+| E03 | Reflection in shop glass | Shot through the reflection in a shop window, the figure's faint reflection layered over the interior |
+| E04 | Depth down a street corner | The figure standing at the far end of a street corner, a corridor-like receding composition |
+| G02 | Calm direct look at the camera | Looking straight into the camera, calm expression, lips lightly closed, no forced expression |
+| G09 | The moment of laughing out loud | Just burst out laughing, eyes curving, shoulders moving slightly |
+| H06 | Bringing hair over one shoulder | Head down bringing the ends of the hair from behind over one shoulder |
+| H11 | Pulling up a zip | One hand pulling a zip upward, the other steadying the hem |
+| M04 | The instant a foot leaves the ground | Mid-moment as the foot leaves the ground and the weight shifts |
+| M05 | Hand halfway raised | The hand caught halfway up, the movement not yet finished |
+| M07 | Walking briskly with slight motion blur | Walking quickly so the figure's edges carry slight motion blur while the surroundings stay still |
+| P01 | Both hands around a takeaway cup | Both hands holding a takeaway cup, gaze off-camera |
+| P02 | Cup held close to the chest | One hand holding a cup with the elbow tucked in against the chest |
+| P06 | Taking a photo of the street | One hand raising a phone toward the street, the screen away from the camera, body leaning slightly forward |
+| P07 | On a call, head turned | Phone at the ear on a call, head turned slightly, the other arm hanging naturally |
+| P10 | Pushing a door open | One hand pushing a glass door open, the body mid-step over the threshold |
+| P13 | Taking off sunglasses | One hand caught mid-motion taking sunglasses off the face |
+| S05 | Leaning on a railing, looking out | Elbow resting on a railing, body in profile, looking into the distance |
+| S06 | Leaning on a pillar, legs crossed | Standing with the back against a pillar, legs crossed naturally, hands clasped in front |
+| S07 | Arms folded, in profile | Arms folded naturally, body in profile looking off-camera, shoulders relaxed and not hunched |
+| S08 | Both hands in pockets, chin tucked | Both hands in pockets, chin tucked slightly, steady gaze |
+| S12 | Leaning toward a shop window | Leaning slightly toward the glass to look inside, weight forward, feet not moving |
+| S14 | Smoothing the front placket | Head down smoothing the front placket with the fingertips pinching the fabric |
+| S15 | One hand at a hat brim | One hand lifting lightly to a hat brim, head slightly down |
+| S16 | Hand raised against the light | Palm held loosely in front of the forehead, eyes narrowed looking into the distance |
+| T01 | Sitting on a step, hands on knees | Sitting on a step with both hands on the knees, upper body leaning slightly forward |
+| T02 | Sitting side-on on a bench | Sitting on a bench turned side-on toward something off-camera, one leg drawn up in front |
+| T07 | Cross-legged, adjusting footwear | Sitting cross-legged on the ground, head down adjusting the opening of a shoe |
+| W01 | Walking straight toward the camera | Walking naturally straight toward the camera, weight forward, arms swinging, gaze passing over the lens into the distance |
+| W02 | The pause after a step | Just planted the front foot with the back foot about to follow, the body still carrying a slight forward lean |
+| W04 | Two steps then turning back | Two steps in, turning back to change direction, the body twisting while the feet keep moving |
+| W06 | Over-the-shoulder tracking | Camera behind and slightly to the right of the subject, shoulder line and street depth visible, the back of the head and right shoulder in frame |
+| W07 | Stepping up onto a step | One foot stepping up onto a step with the other behind, arms hanging naturally |
+| W08 | Stepping down, watching the ground | Mid-step down, head down watching the feet, one hand slightly raised for balance |
+| W10 | Crossing the road, mid-way | Walking in the middle of a zebra crossing, the figure small in frame with the environment dominating |
+| W11 | Waiting at a traffic light | Standing at the edge of a junction waiting for the light, feet apart, gaze toward the traffic ahead |
+| W12 | Walking briskly with a bag | Carrying a bag in one hand, slightly longer stride, a hint of hurry |

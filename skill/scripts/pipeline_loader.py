@@ -447,7 +447,7 @@ def render_set_block(pkg: dict, slot: int) -> str:
             f"Camera Position: {cam}\n"
             f"Framing: {shot}\n"
             f"Action: {a.get('no', '')} {name}"
-            + ("" if hit else "（⚠️ 未收录英文映射，请在 action-en-map（本仓库未收录） 补）") + "\n"
+            + ("" if hit else "（⚠️ unmapped English action — please add it to the action-library EN map）") + "\n"
             f"Gaze: {gaze}\n"
             f"Physical Contact: {contact}\n"
             f"Full Image Prompt: {full}")
