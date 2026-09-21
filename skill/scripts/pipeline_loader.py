@@ -328,6 +328,24 @@ EN_GAZE = {"看镜头": "Looking at the camera", "看向画外": "Looking off-ca
 EN_CONTACT = {"无": "No physical contact", "自身": "Self-contact", "环境": "Contact with the environment",
               "道具": "Contact with the prop", "环境(墙)": "Contact with the wall"}
 
+# 接触对象关键词 → 英文（用于把「自身接触（双手在身后相握）」这类中文括注翻成纯英文）
+CONTACT_KEYS = [
+    (("双手", "手指", "手部", "手腕", "手臂", "手肘", "指尖", "手"), "hands"),
+    (("鞋", "靴", "脚", "裤脚"), "footwear"),
+    (("包", "袋"), "bag"),
+    (("帽",), "hat"),
+    (("唇", "脸", "下颌", "发"), "hand to face or hair"),
+    (("椅面", "凳", "坐", "长椅", "台阶", "沙发", "座"), "seat"),
+    (("墙",), "wall"),
+    (("扶手", "栏杆"), "handrail"),
+    (("杯", "碟"), "cup"),
+    (("手机", "屏幕"), "phone"),
+    (("镜",), "mirror"),
+    (("门", "把手"), "door"),
+    (("桌", "台面", "吧台"), "table"),
+    (("货架", "架"), "shelf"),
+]
+
 EN_MAP_FILE = os.path.join(SKILL, "references", "action-en-map（本仓库未收录）")
 
 
@@ -365,14 +383,24 @@ def _en_gaze(v: str) -> str:
 
 
 def _en_contact(v: str) -> str:
-    v = (v or "无").replace("接触", "").strip()
-    if v in EN_CONTACT:
-        return EN_CONTACT[v]
-    for k, en in EN_CONTACT.items():
-        if v.startswith(k):
-            tail = v[len(k):].strip("()（） ")
-            return f"{en} ({tail})" if tail else en
-    return v
+    """把动作库的中文接触描述翻成纯英文（去掉所有中文括注）。"""
+    raw = (v or "无").strip()
+    if raw in ("", "无", "无接触"):
+        return "No physical contact"
+    if "自身" in raw and "环境" in raw:
+        base = "Self-contact and contact with the environment"
+    elif "自身" in raw:
+        base = "Self-contact"
+    elif "环境" in raw:
+        base = "Contact with the environment"
+    elif "道具" in raw:
+        base = "Contact with the prop"
+    else:
+        base = EN_CONTACT.get(raw, "Contact with the environment")
+    for keys, en in CONTACT_KEYS:
+        if any(k in raw for k in keys):
+            return f"{base} ({en})"
+    return base
 
 
 EN_CONSTRAINT = ("Same person, facial features, hairstyle, body proportions, outfit and accessories as the reference. "
