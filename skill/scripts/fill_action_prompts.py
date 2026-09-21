@@ -171,17 +171,26 @@ def authoritative_counts() -> tuple[int, int, int]:
 def sync_counts(write: bool) -> int:
     total, xn, base_n = authoritative_counts()
     print(f"loader 权威：{total} 条（X 族 {xn} · 规则/实测 {base_n}）\n")
-    targets = ["SKILL.md", "references/06-iteration-log.md", "references/07-image-gen-constraints.md",
-               "references/08-reverse-prompt-spec.md", "references/10-action-library.md",
-               "references/11-pipeline-orchestration.md", "prompts/00-README.md", "prompts/04-nine-groups.md",
-               # 英文表头部也声明条数（2026-09-21 起）
-               "action-en-map（本仓库未收录）"]
+    # 每个逻辑目标给「源库名 / 公开名」两个候选：导出到公开仓库时 references 会整体改名（10→03 等），
+    # 只写源库名会让工具在公开仓库里报一堆「缺文件跳过」——功能等于没有（2026-09-21 实测踩到）。
+    targets = [
+        ["SKILL.md"],
+        ["references/06-iteration-log.md"],
+        ["references/07-image-gen-constraints.md"],
+        ["references/08-reverse-prompt-spec.md", "references/01-reverse-prompt-spec.md"],
+        ["references/10-action-library.md", "references/03-action-library.md"],
+        ["references/11-pipeline-orchestration.md", "references/05-pipeline-orchestration.md"],
+        ["prompts/00-README.md"],
+        ["prompts/04-nine-groups.md"],
+        ["action-en-map（本仓库未收录）", "references/08-action-library-en.md"],
+    ]
     changed_total = 0
-    for rel in targets:
-        p = os.path.join(SKILL, rel)
-        if not os.path.exists(p):
-            print(f"  ⚠️ 缺文件跳过：{rel}")
+    for cands in targets:
+        rel = next((c for c in cands if os.path.exists(os.path.join(SKILL, c))), None)
+        if rel is None:
+            print(f"  ⚠️ 缺文件跳过：{cands[0]}")
             continue
+        p = os.path.join(SKILL, rel)
         src = open(p, encoding="utf-8").read()
         out, n = [], 0
         for line in src.splitlines():
