@@ -185,3 +185,12 @@ python3 scripts/verify_image_note_xlsx.py --src <模板> --out <交付> --rows 2
 | X25 | Seated on a step, cup raised, hand on waist | Seated on a step, left hand raising a cup and right hand on the waist, looking at the camera |
 | X26 | Seated on a surface, both hands around a cup, one knee up | Seated with weight on the hips, legs crossed and one knee raised, both hands around a cup, looking off-frame |
 | X27 | Feet offset, carrying a bag, head lowered | Feet offset with weight on the right leg, left arm bent at the elbow carrying a bag, head lowered |
+| X28 | Standing with both hands propped back on a low wall | Standing with the torso facing the camera and leaning slightly back, both hands propped on the edge of a low wall behind, ankles lightly crossed |
+| X29 | Stepping forward on the street | Mid-step on the street with the upper body tilted slightly to one side, one leg bearing weight, head tilted toward the shoulder, gaze at the camera |
+| X30 | One arm raised with the hand on top of the head | Standing with one arm raised and bent so the hand rests on top of the head, the other arm hanging with an object, feet slightly offset, gaze at the camera |
+| X31 | Seated low with knees drawn up, one hand reaching down | Seated at ground level leaning forward, one knee drawn toward the chest and the other leg folded underneath, one hand reaching down near the ankle |
+| X32 | Seated on a step with forearms crossed on the knees | Seated on the edge of a step with legs together and the lower legs on the step below, forearms crossed on the knees, head turned to one side |
+| X33 | Standing with one hand behind the back | Standing with the torso angled to one side, one forearm resting in front of the waist and the other hand tucked behind the hip, legs close together |
+| X34 | Seated by the window with one hand resting on a cup | Seated on a bench by the window with legs apart and knees bent outward, one forearm on the table edge with the hand on a cup, the other hand on a bag |
+| X35 | Seated sideways on a ledge with a hand propping the cheek | Seated sideways on the edge of a basin counter, hips and lower back against the rim, one elbow on the thigh with the hand propping the cheek, the other hand holding a phone |
+| X36 | Seated on a step holding a drink, one knee bent outward | Seated on a step with weight on one supporting leg and the other knee bent outward, forearms crossed in front of the waist, one hand holding a drink |

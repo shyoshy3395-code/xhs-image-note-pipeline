@@ -12,7 +12,7 @@ Physical Contact: ...
 Full Image Prompt: ...
 ```
 
-- `Action` 必须取自【动作提示词库】（`references/03-action-library.md`，11 族 135 条），带编号（如 `S08`），英文用 `action-en-map（本仓库未收录）` 的映射表；**不要自由发挥**
+- `Action` 必须取自【动作提示词库】（`references/03-action-library.md`，11 族 144 条），带编号（如 `S08`），英文用 `action-en-map（本仓库未收录）` 的映射表；**不要自由发挥**
 - `Full Image Prompt` 简洁直述：具体环境 + 相机位置 + 景别 + 自然动作 + 视线 + 接触关系，并**逐字附带**统一约束句：
   `Same person, facial features, hairstyle, body proportions, outfit and accessories as the reference. Keep the same setting, object placement, color palette and lighting. Natural anatomy, realistic scale and physical contact. Candid smartphone photography, subject in sharp focus, background clear and naturally detailed. No background blur, no shallow depth of field, no bokeh, no portrait-mode blur. Preserve realistic spatial depth without exaggeration.`
 - 同一空间内**只改机位/景别/动作/视线/接触关系**；空间结构、家具、门窗、地面、陈设、色调、服装配饰全部不变
