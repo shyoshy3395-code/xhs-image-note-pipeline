@@ -118,16 +118,21 @@ def main() -> int:
     print(f"库：{lib}\n英文映射表：{len(en_map)} 条\n条目 {len(rows)} 条\n")
 
     if a.check:
-        miss_cn, miss_en = [], []
+        miss_cn, miss_en, cn_left = [], [], []
         for fam, i, cols, cells in rows:
             no = cells[0]
             if no not in en_map:
                 miss_cn.append(no)
             if idx(cols, "Action name (EN)", -1) >= 0 and not cells[idx(cols, COL_NAME_EN)].strip():
                 miss_en.append(no)
+            # 英文三段式里不得残留中文 —— 通常是 loader 的 EN_CAM / EN_SHOT 词典缺了某个取值
+            # （2026-09-21 踩过：`全景空镜带人` 未收录 → W10/E01–E04 五条英文段里冒出中文）
+            if re.search(r"[\u4e00-\u9fff]", cells[-1]):
+                cn_left.append(f"{no}:{cells[-1][:60]}")
         print(f"英文映射表缺：{miss_cn or '无 ✅'}")
         print(f"库内英文列缺：{miss_en or '无 ✅'}")
-        return 0 if not (miss_cn or miss_en) else 1
+        print(f"英文段残留中文：{cn_left or '无 ✅'}")
+        return 0 if not (miss_cn or miss_en or cn_left) else 1
 
     written = skipped = 0
     heads_done = 0

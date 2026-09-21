@@ -344,7 +344,9 @@ EN_CAM = {"正面": "Front view", "正面(俯拍)": "Front view (slightly high a
           "全侧": "Full side profile", "全侧(跟拍)": "Full side profile (tracking)",
           "背面": "Back view"}
 EN_SHOT = {"全身": "full body", "七分": "three-quarter length", "半身": "half body",
-           "局部特写": "close-up detail", "局部": "close-up detail"}
+           "局部特写": "close-up detail", "局部": "close-up detail",
+           # 2026-09-21 补：E 族空镜/大远景会用这个值，缺它会让英文三段式里残留中文
+           "全景空镜带人": "wide establishing shot", "全景": "wide shot", "空镜": "empty-frame shot"}
 EN_GAZE = {"看镜头": "Looking at the camera", "看向画外": "Looking off-camera", "低头": "Looking down",
            "不可见": "Not visible", "侧目看镜头": "Glancing at the camera", "仰头": "Looking up"}
 EN_CONTACT = {"无": "No physical contact", "自身": "Self-contact", "环境": "Contact with the environment",
