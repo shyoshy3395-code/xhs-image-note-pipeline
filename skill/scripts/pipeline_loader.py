@@ -369,14 +369,26 @@ CONTACT_KEYS = [
 ]
 
 EN_MAP_FILE = os.path.join(SKILL, "references", "action-en-map（本仓库未收录）")
+# 导出到公开仓库时该文件被重命名为 references/08-action-library-en.md
+# （与 ACTION_LIB_CANDIDATES 同一套多候选思路：哪个存在用哪个）
+EN_MAP_CANDIDATES = ("action-en-map（本仓库未收录）", "references/08-action-library-en.md")
+
+
+def _en_map_path() -> str:
+    for rel in EN_MAP_CANDIDATES:
+        p = os.path.join(SKILL, rel)
+        if os.path.exists(p):
+            return p
+    return EN_MAP_FILE
 
 
 def load_action_en_map() -> dict:
-    """读 action-en-map（本仓库未收录）：| 编号 | English name | English action description |"""
-    if not os.path.exists(EN_MAP_FILE):
+    """读动作库英文映射表：| 编号 | English name | English action description |"""
+    path = _en_map_path()
+    if not os.path.exists(path):
         return {}
     out = {}
-    for line in open(EN_MAP_FILE, encoding="utf-8"):
+    for line in open(path, encoding="utf-8"):
         m = re.match(r"^\|\s*([A-Z]\d{2})\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|", line)
         if m:
             out[m.group(1)] = (m.group(2), m.group(3))
